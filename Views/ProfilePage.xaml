@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiDemo2.Views.ProfilePage">
+
+    <VerticalStackLayout VerticalOptions="CenterAndExpand"
+                         HorizontalOptions="CenterAndExpand"
+                         Spacing="0"
+                         Padding="30">
+
+        <!--Content-->
+        <VerticalStackLayout Spacing="10">
+            <!--Trigger to show & hide main view when page is busy loading data-->
+            <VerticalStackLayout.Triggers>
+                <DataTrigger TargetType="VerticalStackLayout"
+                             Binding="{Binding IsBusy}"
+                             Value="True">
+                    <Setter Property="IsVisible"
+                            Value="False"/>
+                </DataTrigger>
+            </VerticalStackLayout.Triggers>
+            <Button Text="Get User"
+                    Command="{Binding GetUserCommand}"/>
+
+            <!--Message to be displayed whether user data is loaded or not-->
+            <Label Text="{Binding Message}"
+                   TextColor="Gray"
+                   FontAttributes="Bold"
+                   FontSize="Medium"/>
+
+            <!--User details section-->
+            <VerticalStackLayout>
+                <Label Text="{Binding User.Name,StringFormat='Name: {0}'}"/>
+                <Label Text="{Binding User.Username,StringFormat='Username: {0}'}"/>
+                <Label Text="{Binding User.Email,StringFormat='Email: {0}'}"/>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+
+        <!--Is Busy Loader-->
+        <ActivityIndicator IsRunning="{Binding IsBusy}"
+                           IsVisible="{Binding IsBusy}"
+                           HeightRequest="50"
+                           WidthRequest="50"/>
+
+    </VerticalStackLayout>
+
+</ContentPage>

@@ -1,0 +1,146 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MauiDemo2.ViewModel"
+             xmlns:dto="clr-namespace:MauiDemo2.Dtos"
+             x:Class="MauiDemo2.Views.CardPage"
+             Title="Cards Page">
+
+    <ContentPage.BindingContext>
+        <viewmodels:CardViewModel />
+    </ContentPage.BindingContext>
+
+    <ScrollView>
+        <Grid RowDefinitions="Auto,*,Auto">
+            <Label Grid.Row="0"
+                   Text="Маршруты"
+                   FontAttributes="Bold"
+                   FontSize="30"
+                   HorizontalOptions="Center"
+                   TextColor="Black"
+                   VerticalOptions="End" />
+
+            <CollectionView Grid.Row="1"
+                            ItemsSource="{Binding Routes}"
+                            BackgroundColor="White"
+                            SelectionMode="None">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="dto:RouteDto">
+                        <StackLayout>
+                            <Frame Margin="10"
+                                   BorderColor="OrangeRed"
+                                   CornerRadius="15"
+                                   HasShadow="True"
+                                   HeightRequest="320"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="CenterAndExpand">
+                                <Frame.Shadow>
+                                    <Shadow Brush="Black"
+                                            Opacity="0.8"
+                                            Offset="6,10" />
+                                </Frame.Shadow>
+                                <StackLayout>
+                                    <Label FontAttributes="Bold"
+                                           FontSize="Large"
+                                           HorizontalOptions="Center"
+                                           Text="{Binding Name}"
+                                           VerticalOptions="Center" />
+
+                                    <Label Text="{Binding Distance, StringFormat='Дистанция: {0} км'}"
+                                           FontSize="12"
+                                           TextColor="Black"
+                                           HorizontalOptions="Center" />
+
+                                    <Label Text="{Binding TimesCompleted, StringFormat='Пройдено: {0} раз'}"
+                                           FontSize="12"
+                                           TextColor="Black"
+                                           HorizontalOptions="Center" />
+
+                                    <Label Text="{Binding Rating, StringFormat='Рейтинг: {0}★'}"
+                                           FontSize="12"
+                                           TextColor="Gold"
+                                           HorizontalOptions="Center" />
+
+                                    <Label FontAttributes="Italic"
+                                           HorizontalOptions="Center"
+                                           HorizontalTextAlignment="Center"
+                                           LineBreakMode="WordWrap"
+                                           MaxLines="3"
+                                           Text="{Binding Description}" />
+
+                                    <Button Text="Пройти"
+                                            BackgroundColor="#F17255"
+                                            TextColor="White"
+                                            WidthRequest="120"
+                                            HeightRequest="40"
+                                            HorizontalOptions="Center" />
+                                </StackLayout>
+                            </Frame>
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Grid Grid.Row="2"
+                  BackgroundColor="#EEE"
+                  HeightRequest="50"
+                  VerticalOptions="End"
+                  Padding="10"
+                  RowSpacing="0"
+                  ColumnSpacing="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Image Source="home.png"
+                       Grid.Column="0"
+                       HeightRequest="30"
+                       WidthRequest="30"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenNotificationsCommand}" />
+                    </Image.GestureRecognizers>
+                </Image>
+
+                <Image Source="search.png"
+                       Grid.Column="1"
+                       HeightRequest="30"
+                       WidthRequest="30"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenRouteDetailsCommand}" />
+                    </Image.GestureRecognizers>
+                </Image>
+
+                <Image Source="map.png"
+                       Grid.Column="2"
+                       HeightRequest="30"
+                       WidthRequest="30"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenRouteFollowCommand}" />
+                    </Image.GestureRecognizers>
+                </Image>
+
+                <Image Source="user.png"
+                       Grid.Column="3"
+                       HeightRequest="30"
+                       WidthRequest="30"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenProfileCommand}" />
+                    </Image.GestureRecognizers>
+                </Image>
+            </Grid>
+        </Grid>
+    </ScrollView>
+</ContentPage>
