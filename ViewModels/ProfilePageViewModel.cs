@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MauiDemo2.Dtos;
-using MauiDemo2.Services;
+using MauiDemo2.WebClients;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -33,7 +33,7 @@ namespace MauiDemo2.ViewModel
         private async Task GetUser()
         {
             IsBusy = true;
-            await RouteServiceCall<UserRequestDto>.Get($"users/{getCurrentUserId()}", UserDataLoaded, UserDataFailed);
+            await RouteServiceClient<UserRequestDto>.Get($"users/{getCurrentUserId()}", UserDataLoaded, UserDataFailed);
             IsBusy = false;
         }
 

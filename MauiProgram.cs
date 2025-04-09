@@ -1,5 +1,7 @@
-﻿using MauiDemo2.Dtos;
-using MauiDemo2.Services;
+﻿using AutoMapper;
+using CommunityToolkit.Maui;
+using MauiDemo2.Dtos;
+using MauiDemo2.Mappers;
 using MauiDemo2.ViewModel;
 using MauiDemo2.Views;
 using Microsoft.Extensions.Logging;
@@ -14,6 +16,7 @@ namespace MauiDemo2
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -22,13 +25,17 @@ namespace MauiDemo2
                     fonts.AddFont("Inter-Bold.ttf", "InterBold");
                 });
 
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
+
             builder.Services.AddTransient<CardPage>();
             builder.Services.AddTransient<CardViewModel>();
             builder.Services.AddTransient<ProfilePage>();
             builder.Services.AddTransient<ProfilePageViewModel>();
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();

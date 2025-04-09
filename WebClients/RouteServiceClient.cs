@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MauiDemo2.Services
+namespace MauiDemo2.WebClients
 {
-    public static class RouteServiceCall<T>
+    public static class RouteServiceClient<T>
     {
-        private static readonly string BASE_URL = "http://localhost:3000/";
+        private static readonly string BASE_URL = "http://localhost:5246/";
         static HttpClient Client = new HttpClient() { Timeout = TimeSpan.FromSeconds(60) };
 
         public static async Task Get(string endPoint, Action<T> onSuccess, Action<Exception> onError)
