@@ -5,8 +5,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:MauiDemo2"
     xmlns:views="clr-namespace:MauiDemo2.Views"
-    Shell.FlyoutBehavior="Disabled"
-    Title="MauiDemo2">
+    Shell.FlyoutBehavior="Disabled">
 
-    <ShellContent Title="Главная" ContentTemplate="{DataTemplate views:CardPage}" />
+    <ShellContent Title="Главная"
+                  ContentTemplate="{DataTemplate views:CardPage}"
+                  Shell.NavBarIsVisible="False" />
 </Shell>

@@ -29,9 +29,9 @@ namespace MauiDemo2.Models
 
         public List<string> Images { get; set; } = new List<string>
         {
-            "minecraft.jpg",
-            "minecraft.jpg",
-            "minecraft.jpg"
+            "white.jpg",
+            "white.jpg",
+            "white.jpg"
         };
         private List<string> SplitText(string text, int chunkSize)
         {
