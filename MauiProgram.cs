@@ -6,6 +6,7 @@ using MauiDemo2.ViewModel;
 using MauiDemo2.Views;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
+using Sharpnado.MaterialFrame;
 
 namespace MauiDemo2
 {
@@ -17,6 +18,7 @@ namespace MauiDemo2
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
+                .UseSharpnadoMaterialFrame(loggerEnable: false)
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -24,7 +26,6 @@ namespace MauiDemo2
                     fonts.AddFont("Inter-Regular.ttf", "InterRegular");
                     fonts.AddFont("Inter-Bold.ttf", "InterBold");
                 });
-
             builder.Services.AddAutoMapper(typeof(MappingProfile));
 
             builder.Services.AddTransient<CardPage>();

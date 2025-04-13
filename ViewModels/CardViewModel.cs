@@ -16,9 +16,10 @@ namespace MauiDemo2.ViewModel
 
         [ObservableProperty]
         bool isBusy;
-
         [ObservableProperty]
         string message;
+        [ObservableProperty]
+        private bool isFlyoutVisible;
 
         public IAsyncRelayCommand GetRoutesCommand { get; }
         public ICommand ToggleFavoriteCommand { get; }
@@ -28,6 +29,7 @@ namespace MauiDemo2.ViewModel
         public ICommand OpenRouteFollowCommand { get; }
         public ICommand OpenNotificationsCommand { get; }
         public ICommand OpenRouteDetailsCommand { get; }
+        public ICommand ToggleFlyoutCommand { get; }
 
         private readonly IMapper _mapper;
         private readonly string lorem = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.";
@@ -42,9 +44,31 @@ namespace MauiDemo2.ViewModel
             OpenRouteFollowCommand = new RelayCommand(OpenRouteFollow);
             OpenNotificationsCommand = new RelayCommand(OpenNotifications);
             OpenRouteDetailsCommand = new RelayCommand<RouteMainPage>(OpenRouteDetails);
+            ToggleFlyoutCommand = new RelayCommand(ToggleFlyout);
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 
             _ = GetRoutes();
+        }
+        private void ToggleFlyout()
+        {
+            System.Diagnostics.Debug.WriteLine("ToggleFlyout command fired");
+            IsFlyoutVisible = !IsFlyoutVisible;
+        }
+        partial void OnIsFlyoutVisibleChanged(bool value)
+        {
+            Page currentPage = Shell.Current?.CurrentPage;
+            if (currentPage is CardPage cardPage)
+            {
+                cardPage.FlyoutAnimation(value);
+            }
+            else if (currentPage is NavigationPage navPage && navPage.CurrentPage is CardPage cardPage2)
+            {
+                cardPage2.FlyoutAnimation(value);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("CurrentPage is not CardPage. Actual type: " + currentPage?.GetType().ToString());
+            }
         }
 
         private async Task GetRoutes()
@@ -60,7 +84,6 @@ namespace MauiDemo2.ViewModel
             //await RouteServiceClient<ObservableCollection<TripResponseDto>>.Get("routes", RoutesDataLoaded, RoutesDataLoadFailed);
             IsBusy = false;
         }
-
         private void RoutesDataLoaded(ObservableCollection<TripResponseDto> dtoList)
         {
             Routes.Clear();
