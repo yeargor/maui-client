@@ -1,38 +1,174 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace MauiDemo2.Models
 {
-    public class RouteMainPage
+    public class RouteMainPage : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public int Id { get; set; }
-        public string Name { get; set; }
+
+        private string _name;
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (_name != value)
+                {
+                    _name = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private string _description;
         public string Description
         {
             get => _description;
             set
             {
-                _description = value;
-                DescriptionParts = SplitText(value, 200);
+                if (_description != value)
+                {
+                    _description = value;
+                    DescriptionParts = SplitText(value, 200);
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(DescriptionParts));
+                }
             }
         }
-        public List<string> DescriptionParts { get; private set; } = new List<string>();
-        public int TimesCompleted { get; set; }
-        public double Rating { get; set; }
-        public double Distance { get; set; }
-        public string DaysAgo { get; set; }
-        public bool IsFavorite { get; set; }
-        private string _description;
 
-        public List<string> Images { get; set; } = new List<string>
+        public List<string> DescriptionParts { get; private set; } = new List<string>();
+
+        private int _timesCompleted;
+        public int TimesCompleted
         {
-            "white.jpg",
-            "white.jpg",
-            "white.jpg"
-        };
+            get => _timesCompleted;
+            set
+            {
+                if (_timesCompleted != value)
+                {
+                    _timesCompleted = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private float _rating;
+        public float Rating
+        {
+            get => _rating;
+            set
+            {
+                if (_rating != value)
+                {
+                    _rating = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private double _distance;
+        public double Distance
+        {
+            get => _distance;
+            set
+            {
+                if (_distance != value)
+                {
+                    _distance = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private string _daysAgo;
+        public string DaysAgo
+        {
+            get => _daysAgo;
+            set
+            {
+                if (_daysAgo != value)
+                {
+                    _daysAgo = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _isFavorite;
+        public bool IsFavorite
+        {
+            get => _isFavorite;
+            set
+            {
+                if (_isFavorite != value)
+                {
+                    _isFavorite = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _isSaved;
+        public bool IsSaved
+        {
+            get => _isSaved;
+            set
+            {
+                if (_isSaved != value)
+                {
+                    _isSaved = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _isFinished;
+        public bool IsFinished
+        {
+            get => _isFinished;
+            set
+            {
+                if (_isFinished != value)
+                {
+                    _isFinished = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private User _user;
+        public User User
+        {
+            get => _user;
+            set
+            {
+                if (_user != value)
+                {
+                    _user = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private List<string> _images = new List<string> { "white.jpg", "white.jpg", "white.jpg" };
+        public List<string> Images
+        {
+            get => _images;
+            set
+            {
+                if (_images != value)
+                {
+                    _images = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         private List<string> SplitText(string text, int chunkSize)
         {
             if (string.IsNullOrEmpty(text)) return new List<string>();
@@ -44,6 +180,12 @@ namespace MauiDemo2.Models
                 parts.Add(text.Substring(i, length));
             }
             return parts;
+        }
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            System.Diagnostics.Debug.WriteLine($"PropertyChanged triggered for {propertyName}");
         }
     }
 }

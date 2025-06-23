@@ -9,7 +9,7 @@ namespace MauiDemo2.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is double rating)
+            if (value is float rating)
             {
                 int rounded = Math.Max(0, Math.Min(5, (int)Math.Round(rating)));
                 var stars = new List<string>();

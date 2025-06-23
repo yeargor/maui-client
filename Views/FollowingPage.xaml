@@ -1,0 +1,200 @@
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MauiDemo2.ViewModels"
+             xmlns:maps="http://schemas.microsoft.com/dotnet/2021/maui/maps"
+             xmlns:models="clr-namespace:MauiDemo2.Models"
+             xmlns:converters="clr-namespace:MauiDemo2.Converters"
+             xmlns:tabs="http://sharpnado.com"
+             x:Class="MauiDemo2.Views.FollowingPage"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+            <converters:BoolToTextConverter x:Key="BoolToTextConverter"/>
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid>
+        <AbsoluteLayout x:Name="TopSection" Grid.Row="0" HeightRequest="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=Height}">
+            <maps:Map
+                    x:Name="MyMap"
+                    ItemsSource="{Binding LocationPins}"
+                    VerticalOptions="FillAndExpand"
+                    HorizontalOptions="FillAndExpand"
+                    IsShowingUser="True"
+                    AbsoluteLayout.LayoutBounds="0,0,1,1"
+                    AbsoluteLayout.LayoutFlags="All">
+                <maps:Map.ItemTemplate>
+                    <DataTemplate x:DataType="{x:Type models:LocationPin}">
+                        <models:CustomPin
+                            Location="{Binding Location}"
+                            Address="{Binding Address}"
+                            Label="{Binding Description}"
+                            ImageSource="{Binding ImageSource}"
+                            Type="Place"
+                            OrderOfVisit="{Binding OrderOfVisit}" />
+                    </DataTemplate>
+                </maps:Map.ItemTemplate>
+            </maps:Map>
+            <Border StrokeShape="Ellipse"
+                    StrokeThickness="0"
+                    BackgroundColor="White"
+                    HeightRequest="45"
+                    WidthRequest="45"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center"
+                    Margin="10">
+                <Image Source="arrow.svg"
+                    HeightRequest="22"
+                    WidthRequest="22"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding NavigateToCardPageCommand}" />
+                    </Image.GestureRecognizers>
+                </Image>
+            </Border>
+            <Border Stroke="White" StrokeThickness="1" BackgroundColor="White"
+                    AbsoluteLayout.LayoutBounds="0.5,0.88,0.8,0.24"
+                    AbsoluteLayout.LayoutFlags="All">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="20" />
+                </Border.StrokeShape>
+                <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*, *" VerticalOptions="Start" HorizontalOptions="Center" ColumnSpacing="50" RowSpacing="10" Padding="10">
+                    <Label Text="Название маршрута" FontSize="14" Grid.Row="0" Grid.ColumnSpan="2" HorizontalOptions="Center" VerticalOptions="Start" />
+                    <Label Text="{Binding TotalDistance, StringFormat='{0} м'}" 
+                            TextColor="#F34C27" 
+                            FontSize="20" 
+                            FontAttributes="Bold" 
+                            Grid.Row="1" 
+                            Grid.Column="0" 
+                            VerticalOptions="Center" 
+                            IsVisible="{Binding IsTrackingEnabled}" />
+                    <Label Text="{Binding FormattedTime}" 
+                            TextColor="#F17256" 
+                            FontSize="20" 
+                            FontAttributes="Bold" 
+                            Grid.Row="2" 
+                            Grid.Column="0" 
+                            VerticalOptions="Center" 
+                            HorizontalOptions="Start" 
+                            IsVisible="{Binding IsTrackingEnabled}" />
+                    <Frame BackgroundColor="#B8E5FF" BorderColor="White" CornerRadius="6" Padding="0" WidthRequest="77" HeightRequest="30" Grid.Row="1" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Start">
+                        <Grid VerticalOptions="Center" HorizontalOptions="Center">
+                            <Image Source="cloud.svg" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="Start" Margin="0,0,0,0" />
+                            <Label Text="{Binding WeatherData.Temperature_2m, StringFormat='{0} C'}" TextColor="#136FA4" FontSize="Small" VerticalOptions="Center" HorizontalOptions="End" Margin="30,0,0,0" />
+                        </Grid>
+                    </Frame>
+                    <Frame BackgroundColor="#E0F7FA" CornerRadius="6" BorderColor="White" Padding="0" WidthRequest="77" HeightRequest="30" Grid.Row="2" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Start">
+                        <Grid VerticalOptions="Center" HorizontalOptions="Center">
+                            <Image Source="wind.svg" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" HorizontalOptions="Start" Margin="0,0,0,0" />
+                            <Label Text="{Binding WeatherData.Relative_humidity_2m, StringFormat='{0}%'}" TextColor="#136FA4" FontSize="Small" VerticalOptions="Center" HorizontalOptions="End" Margin="30,0,0,0" />
+                        </Grid>
+                    </Frame>
+                </Grid>
+            </Border>
+            <Button Text="{Binding IsTrackingEnabled, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Начать маршрут|Остановиться'}"
+                    BackgroundColor="{Binding IsTrackingEnabled, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#F17256|#FFD659'}"
+                    TextColor="White"
+                    FontSize="14"
+                    IsVisible="True"
+                    CornerRadius="20"
+                    WidthRequest="150"
+                    HeightRequest="36"
+                    AbsoluteLayout.LayoutBounds="0.5,0.95,150,55"
+                    AbsoluteLayout.LayoutFlags="PositionProportional"
+                    Command="{Binding ToggleTrackingCommand}" />
+
+            <!-- Popup for Pin Details -->
+            <Border x:Name="PinDetailsPopup"
+                    BackgroundColor="White"
+                    Stroke="Black"
+                    StrokeThickness="1"
+                    Padding="10,0,10,0"
+                    IsVisible="False"
+                    AbsoluteLayout.LayoutBounds="0.5, 1, 1, 0.5"
+                    AbsoluteLayout.LayoutFlags="All">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+                <Grid>
+                    <VerticalStackLayout VerticalOptions="FillAndExpand">
+                        <Grid ColumnDefinitions="*,Auto,*">
+                            <Label Text="{Binding SelectedLocationBase.Name}" 
+                                FontSize="15" 
+                                FontAttributes="Bold"
+                                TextColor="Black"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"
+                                Grid.Column="1" />
+                            <Button Text="✕"
+                                    BackgroundColor="Transparent"
+                                    TextColor="Black"
+                                    FontSize="14"
+                                    CornerRadius="0"
+                                    WidthRequest="60"
+                                    HeightRequest="60"
+                                    HorizontalOptions="End"
+                                    VerticalOptions="Center"
+                                    Command="{Binding ClosePinDetailsCommand}"
+                                    Grid.Row="0"
+                                    Grid.Column="2" />
+                        </Grid>
+
+                        <tabs:TabHostView x:Name="TabHost"
+                            SelectedIndex="0"
+                            HeightRequest="50"
+                            BackgroundColor="White"
+                            TabType="Scrollable"
+                            UseMauiTapGesture="True">
+                            <tabs:UnderlinedTabItem Label="Описание"
+                                                    SelectedTabColor="#FFD659" 
+                                                    UnselectedLabelColor="#A3A3A3" 
+                                                    LabelSize="16"
+                                                    Margin="10,0,10,0" 
+                                                    HorizontalOptions= "Center"
+                                                    FontFamily="Inter-Bold" />
+                        </tabs:TabHostView>
+
+                        <BoxView HeightRequest="1"
+                                BackgroundColor="#FFD659"
+                                HorizontalOptions="FillAndExpand"/>
+                        <tabs:ViewSwitcher HorizontalOptions="FillAndExpand"
+                                    VerticalOptions="FillAndExpand"
+                                    SelectedIndex="{Binding Source={x:Reference TabHost}, Path=SelectedIndex}">
+                            <ContentView>
+                                <ScrollView>
+                                    <Label Text="{Binding SelectedLocationBase.Description}" 
+                                        FontSize="14" 
+                                        TextColor="Black"
+                                        Margin="10"/>
+                                </ScrollView>
+                            </ContentView>
+                            <ContentView>
+                                <ScrollView>
+                                    <Label Text="{Binding SelectedLocationBase.Description}" 
+                                        FontSize="14" 
+                                        TextColor="Black"
+                                        Margin="10"/>
+                                </ScrollView>
+                            </ContentView>
+                        </tabs:ViewSwitcher>
+                    </VerticalStackLayout>
+                    <Button Text="{Binding IsTrackingEnabled, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Начать маршрут|Остановиться'}"
+                            BackgroundColor="{Binding IsTrackingEnabled, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#F17256|#FFD659'}"
+                            TextColor="White"
+                            FontSize="14"
+                            CornerRadius="20"
+                            Margin="20"
+                            WidthRequest="150"
+                            HeightRequest="36"
+                            VerticalOptions="End"
+                            Command="{Binding ToggleTrackingCommand}" />
+                </Grid>
+            </Border>
+        </AbsoluteLayout>
+    </Grid>
+</ContentPage>

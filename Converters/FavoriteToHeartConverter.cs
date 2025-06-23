@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using MauiDemo2.Models.Common;
 
 namespace MauiDemo2.Converters
 {
@@ -7,11 +8,14 @@ namespace MauiDemo2.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool isFavorite)
+            System.Diagnostics.Debug.WriteLine($"Converter received value: {value}");
+
+            if (value is UserLike userLike)
             {
-                return isFavorite ? "heartred.svg" : "heart.svg";
+                return userLike.IsUserFavorite ? "heartred.svg" : "heart.svg";
             }
-            return null;
+
+            return "heart.svg";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

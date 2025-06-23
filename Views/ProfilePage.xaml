@@ -1,47 +1,366 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MauiDemo2.Views.ProfilePage">
+             xmlns:viewmodels="clr-namespace:MauiDemo2.ViewModel"
+             xmlns:models="clr-namespace:MauiDemo2.Models.Route"
+             xmlns:converters="clr-namespace:MauiDemo2.Converters"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="MauiDemo2.Views.ProfilePage"
+             x:DataType="viewmodels:ProfilePageViewModel"
+             Shell.TabBarIsVisible="True"
+             BackgroundColor="#FFFCF1">
 
-    <VerticalStackLayout VerticalOptions="CenterAndExpand"
-                         HorizontalOptions="CenterAndExpand"
-                         Spacing="0"
-                         Padding="30">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:RatingToStarsConverter x:Key="RatingToStarsConverter"/>
+            <converters:FavoriteToHeartConverter x:Key="FavoriteToHeartConverter"/>
+            <converters:ActiveTabConverter x:Key="ActiveTabConverter"/>
+            <converters:ActiveTabColorConverter x:Key="ActiveTabColorConverter"/>
+            <Style TargetType="Label">
+                <Setter Property="FontFamily" Value="Inter-Regular" />
+            </Style>
 
-        <!--Content-->
-        <VerticalStackLayout Spacing="10">
-            <!--Trigger to show & hide main view when page is busy loading data-->
-            <VerticalStackLayout.Triggers>
-                <DataTrigger TargetType="VerticalStackLayout"
-                             Binding="{Binding IsBusy}"
-                             Value="True">
-                    <Setter Property="IsVisible"
-                            Value="False"/>
-                </DataTrigger>
-            </VerticalStackLayout.Triggers>
-            <Button Text="Get User"
-                    Command="{Binding GetUserCommand}"/>
+            <Style TargetType="Button">
+                <Setter Property="FontFamily" Value="Inter-Regular" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
-            <!--Message to be displayed whether user data is loaded or not-->
-            <Label Text="{Binding Message}"
-                   TextColor="Gray"
-                   FontAttributes="Bold"
-                   FontSize="Medium"/>
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Spacing="10">
+                <Grid ColumnDefinitions="Auto, *, Auto"
+                      Margin="20,0,20,0"
+                      VerticalOptions="Start"
+                      ColumnSpacing="5"
+                       Padding="15">
+                    <Border StrokeShape="Ellipse"
+                            StrokeThickness="0"
+                            BackgroundColor="#F9D6B8"
+                            HeightRequest="90"
+                            WidthRequest="90"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center">
+                        <Image Source="{Binding UserProfile.UserInfo.ImageUrl}"
+                               Aspect="AspectFill"
+                               HeightRequest="90"
+                               WidthRequest="90"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1"
+                                         Margin="10,0,0,0"
+                                         VerticalOptions="Center"
+                                         Spacing="2">
 
-            <!--User details section-->
-            <VerticalStackLayout>
-                <Label Text="{Binding User.Name,StringFormat='Name: {0}'}"/>
-                <Label Text="{Binding User.Username,StringFormat='Username: {0}'}"/>
-                <Label Text="{Binding User.Email,StringFormat='Email: {0}'}"/>
+                        <Label Text="{Binding UserProfile.UserInfo.Username}"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="Black" />
+                        <Label>
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding UserProfile.UserInfo.FirstName}" 
+                                          FontSize="10"
+                                          TextColor="Black" />
+                                    <Span Text=" "
+                                          FontSize="10"/>
+                                    <Span Text="{Binding UserProfile.UserInfo.LastName}" 
+                                          FontSize="10"
+                                          TextColor="Black" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Label Text="{Binding TotalDoneDistance, StringFormat='{0} км'}"
+                               FontSize="16"
+                               Margin="0,10,0,0"
+                               FontAttributes="Bold"
+                               TextColor="Black" />
+                    </VerticalStackLayout>
+
+                    <Image Source="gear.svg"
+                           Grid.Column="2"
+                           HeightRequest="32"
+                           WidthRequest="32"
+                           VerticalOptions="Start"
+                           HorizontalOptions="End"
+                           Margin="10,10,0,10">
+                        
+                    </Image>
+                </Grid>
+                <Grid ColumnDefinitions="*, *"
+                      ColumnSpacing="20"
+                      Margin="30,0,30,0">
+                    <Border StrokeShape="RoundRectangle 15"
+                            StrokeThickness="0"
+                            BackgroundColor="White"
+                            VerticalOptions="Center"
+                            HeightRequest="35"
+                            HorizontalOptions="FillAndExpand">
+                        <HorizontalStackLayout  HorizontalOptions="Center"
+                                                VerticalOptions="Center"
+                                                Spacing="10">
+                            <Label Text="{Binding UserProfile.FollowersNumber}"
+                                   FontSize="15"
+                                   TextColor="Black"
+                                   HorizontalOptions="Center" />
+                            <Label Text="Подписчики"
+                                    FontSize="14"
+                                    TextColor="Black"
+                                    HorizontalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <Border.Shadow>
+                            <Shadow Brush="#343330" 
+                                    Opacity="0.4" 
+                                    Offset="0,4" 
+                                    Radius="6" />
+                        </Border.Shadow>
+                    </Border>
+                    <Border StrokeShape="RoundRectangle 15"
+                            StrokeThickness="0"
+                            BackgroundColor="White"
+                            VerticalOptions="Center"
+                            HorizontalOptions="FillAndExpand"
+                            HeightRequest="35"
+                            Grid.Column="1">
+                        <HorizontalStackLayout HorizontalOptions="Center"
+                                               VerticalOptions="Center"
+                                               Spacing="10">
+                            <Label Text="{Binding UserProfile.SubscriptionsNumber}"
+                                    FontSize="15"
+                                    TextColor="Black"
+                                    HorizontalOptions="Center" />
+                            <Label Text="Подписки"
+                                   FontSize="14"
+                                   TextColor="Black"
+                                   HorizontalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <Border.Shadow>
+                            <Shadow Brush="#343330" 
+                                    Opacity="0.4" 
+                                    Offset="0,4" 
+                                    Radius="6" />
+                        </Border.Shadow>
+                    </Border>
+                </Grid>
+                <Grid ColumnDefinitions="*, *, *"
+                      HeightRequest="52"
+                      BackgroundColor="#F9D6B8"
+                      Margin="0,15,0,0">
+                    <HorizontalStackLayout Grid.Column="0"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"
+                                           Spacing="5">
+                        <Image HeightRequest="26"
+                               WidthRequest="26"
+                               Source="{Binding ActiveTab, Converter={StaticResource ActiveTabConverter}, ConverterParameter='map'}">
+                            <Image.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ChangeTabCommand}" CommandParameter="map" />
+                            </Image.GestureRecognizers>
+                        </Image>
+                        <Label Text="{Binding SaveMarksCount}"
+                               FontSize="14"
+                               TextColor="{Binding ActiveTab, Converter={StaticResource ActiveTabColorConverter}, ConverterParameter='map'}" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Grid.Column="1"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"
+                                           Spacing="5">
+                        <Image HeightRequest="26"
+                               WidthRequest="26"
+                               Source="{Binding ActiveTab, Converter={StaticResource ActiveTabConverter}, ConverterParameter='path_circle'}">
+                            <Image.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ChangeTabCommand}" CommandParameter="path_circle" />
+                            </Image.GestureRecognizers>
+                        </Image>
+                        <Label Text="{Binding DoneMarksCount}"
+                               FontSize="14"
+                               TextColor="{Binding ActiveTab, Converter={StaticResource ActiveTabColorConverter}, ConverterParameter='path_circle'}" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Grid.Column="2"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"
+                                           Spacing="5">
+                        <Image HeightRequest="26"
+                               WidthRequest="26"
+                               Source="{Binding ActiveTab, Converter={StaticResource ActiveTabConverter}, ConverterParameter='heart_black'}">
+                            <Image.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ChangeTabCommand}" CommandParameter="heart_black" />
+                            </Image.GestureRecognizers>
+                        </Image>
+                        <Label Text="{Binding LikeMarksCount}"
+                               FontSize="14"
+                               TextColor="{Binding ActiveTab, Converter={StaticResource ActiveTabColorConverter}, ConverterParameter='heart_black'}" />
+                    </HorizontalStackLayout>
+                </Grid>
+                <Grid Padding="15">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentRoutes}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:RouteCardUserResponseDto">
+                                <VerticalStackLayout>
+                                    <Grid  ColumnDefinitions="*, Auto"
+                                            ColumnSpacing="20"
+                                            Margin="20,0,0,10">
+                                        <!-- <HorizontalStackLayout Spacing="10">
+                                            <Border StrokeShape="Ellipse"
+                                                     StrokeThickness="0"
+                                                     BackgroundColor="White"
+                                                     HeightRequest="45"
+                                                     WidthRequest="45"
+                                                     HorizontalOptions="Start"
+                                                     VerticalOptions="Center">
+                                                <Image Source="{Binding UserInfo.ImageUrl}"
+                                                        HeightRequest="22"
+                                                        WidthRequest="22"
+                                                        VerticalOptions="Center"
+                                                        HorizontalOptions="Center"
+                                                        Margin="10"/>
+                                                <Border.Shadow>
+                                                    <Shadow Brush="#343330"
+                                                             Opacity="0.4"
+                                                             Offset="0,4"
+                                                             Radius="6" />
+                                                </Border.Shadow>
+                                            </Border>
+                                            <Label Text="{Binding UserInfo.Username}"
+                                                    FontSize="14"
+                                                    TextColor="Black"
+                                                    VerticalOptions="Center"/>
+                                        </HorizontalStackLayout> -->
+                                        <!-- <Label Text="3 дня назад"
+                                                FontSize="13"
+                                                TextColor="Black"
+                                                VerticalOptions="End"
+                                                HorizontalOptions="End"/> -->
+                                    </Grid>
+                                    <Border StrokeShape="RoundRectangle 25"
+                                             StrokeThickness="0"
+                                             BackgroundColor="#F9D6B8"
+                                             Padding="0"
+                                             Margin="20, 0, 20 , 30">
+                                        <Border.Shadow>
+                                            <Shadow Brush="#343330" 
+                                                     Opacity="0.4" 
+                                                     Offset="0,4" 
+                                                     Radius="6" />
+                                        </Border.Shadow>
+                                        <Grid RowDefinitions="200, Auto, Auto, Auto"
+                                                 RowSpacing="5"
+                                                 HorizontalOptions="FillAndExpand">
+                                            <CarouselView ItemsSource="{Binding RouteInfo.ImagesUrls}"
+                                                         Grid.Row="0">
+                                                <CarouselView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border StrokeThickness="0"
+                                                                Padding="0">
+                                                            <Border.StrokeShape>
+                                                                <RoundRectangle CornerRadius="0,0,25,25"/>
+                                                            </Border.StrokeShape>
+                                                            <Image Source="{Binding .}"
+                                                                    Aspect="AspectFill"
+                                                                    HorizontalOptions="FillAndExpand"
+                                                                    VerticalOptions="FillAndExpand"/>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </CarouselView.ItemTemplate>
+                                            </CarouselView>
+                                            <Label Grid.Row="0"
+                                                    Grid.Column="0"
+                                                    Text="{Binding RouteInfo.RouteTitle}"
+                                                    FontSize="16"
+                                                    TextColor="Black"
+                                                    VerticalOptions="Start"
+                                                    HorizontalOptions="Start"
+                                                    Margin="20,15,0,0"/>
+                                            <Image Grid.Row="0"
+                                                   Grid.Column="1"
+                                                  Source="{Binding RouteInfo.UserLike, Converter={StaticResource FavoriteToHeartConverter}}"
+                                                   WidthRequest="30"
+                                                   HeightRequest="30"
+                                                   VerticalOptions="Start"
+                                                   HorizontalOptions="End"
+                                                   Margin="0,15,20,0">
+                                                <Image.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:ProfilePageViewModel}}, Path=UpdateFavoriteCommand}" CommandParameter="{Binding .}" />
+                                                </Image.GestureRecognizers>
+                                            </Image>
+
+                                            <VerticalStackLayout Grid.Row="0"
+                                                              Grid.Column="0"
+                                                              VerticalOptions="End"
+                                                              HorizontalOptions="Start"
+                                                              Margin="20,0,0,20"
+                                                              Spacing="2">
+                                                <HorizontalStackLayout Spacing="5">
+                                                    <Image Source="trip.svg"
+                                                            HeightRequest="23"
+                                                            WidthRequest="23"
+                                                            VerticalOptions="Center">
+                                                        <Image.Behaviors>
+                                                            <toolkit:IconTintColorBehavior TintColor="#343330" />
+                                                        </Image.Behaviors>
+                                                    </Image>
+                                                    <Label Text="{Binding RouteInfo.RouteDistance, StringFormat='{}{0} km'}"
+                                                            FontSize="15"
+                                                            TextColor="Black"
+                                                            VerticalOptions="Center"/>
+                                                </HorizontalStackLayout>
+                                                <HorizontalStackLayout Spacing="5">
+                                                    <Image Source="run.svg"
+                                                            HeightRequest="17"
+                                                            WidthRequest="17"
+                                                            VerticalOptions="Center"/>
+                                                    <Label Text="{Binding UserCount}"  
+                                                            FontSize="11"
+                                                            TextColor="Black"
+                                                            VerticalOptions="Center"/>
+                                                </HorizontalStackLayout>
+                                                <HorizontalStackLayout Spacing="5">
+                                                    <HorizontalStackLayout Spacing="5" HorizontalOptions="Start" BindableLayout.ItemsSource="{Binding RouteInfo.RouteRating, Converter={StaticResource RatingToStarsConverter}}">
+                                                        <BindableLayout.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Image Source="{Binding .}" WidthRequest="14" HeightRequest="15" />
+                                                            </DataTemplate>
+                                                        </BindableLayout.ItemTemplate>
+                                                    </HorizontalStackLayout>
+                                                    <Label Text="{Binding RouteInfo.RouteRating}"
+                                                             FontSize="12"
+                                                             TextColor="Black"
+                                                             VerticalOptions="Center" />
+                                                </HorizontalStackLayout>
+                                            </VerticalStackLayout>
+                                            <IndicatorView Grid.Row="1"
+                                                            x:Name="TextIndicator"
+                                                            IndicatorColor="#FDA895"
+                                                            SelectedIndicatorColor="#F17256"
+                                                            HorizontalOptions="Center"
+                                                            IndicatorSize="7"/>
+                                            <CarouselView Grid.Row="2"
+                                                           ItemsSource="{Binding RouteInfo.DescriptionParts}"
+                                                           HorizontalOptions="FillAndExpand"
+                                                           IsBounceEnabled="False"
+                                                           PeekAreaInsets="0"
+                                                           Margin="15,0,15,10"
+                                                           Loop="False"
+                                                           IndicatorView="{x:Reference TextIndicator}">
+                                                <CarouselView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Label Text="{Binding .}"
+                                                                FontSize="10"
+                                                                HorizontalOptions="FillAndExpand"
+                                                                VerticalOptions="FillAndExpand"
+                                                                TextColor="Black"
+                                                                LineBreakMode="WordWrap"/>
+                                                    </DataTemplate>
+                                                </CarouselView.ItemTemplate>
+                                            </CarouselView>
+                                        </Grid>
+                                    </Border>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </Grid>
             </VerticalStackLayout>
-        </VerticalStackLayout>
-
-        <!--Is Busy Loader-->
-        <ActivityIndicator IsRunning="{Binding IsBusy}"
-                           IsVisible="{Binding IsBusy}"
-                           HeightRequest="50"
-                           WidthRequest="50"/>
-
-    </VerticalStackLayout>
-
+        </ScrollView>
+    </Grid>
 </ContentPage>

@@ -1,0 +1,191 @@
+@startuml
+
+title Entity Relationship Diagram for MauiDemo2
+
+entity "User" {
+    * Id : int
+    --
+    Username : string
+    Email : string
+}
+
+entity "RouteMainPage" {
+    * Id : int
+    --
+    Name : string
+    Description : string
+    TimesCompleted : int
+    Rating : float
+    IsSaved : bool
+    IsFinished : bool
+}
+
+entity "Review" {
+    * Id : int
+    --
+    UserId : int
+    Text : string
+    Rating : int
+}
+
+entity "Place" {
+    * Id : int
+    --
+    Name : string
+    Description : string
+}
+
+entity "AdditionalPlace" {
+    * Id : int
+    --
+    Name : string
+    Type : AdditionalPlaceType
+}
+
+entity "Point" {
+    * X : double
+    * Y : double
+}
+
+entity "RoutePostResponseDto" {
+    * RouteInfo : RouteInfoResponseDto
+    --
+    AuthorUsername : string
+    RoutePathImageUrl : string
+    RouteTime : int
+}
+
+entity "Subscription" {
+    * Id : int
+    --
+    UserId : int
+    RouteId : int
+}
+
+entity "WeatherCurrent" {
+    * Temperature : double
+    --
+    Condition : string
+}
+
+entity "RouteInfoResponseDto" {
+    * Id : int
+    --
+    Name : string
+    Description : string
+}
+
+entity "PlaceInfoResponseDto" {
+    * Id : int
+    --
+    Name : string
+    Description : string
+}
+
+entity "AdditionalPlaceInfoResponseDto" {
+    * Id : int
+    --
+    Name : string
+    Type : AdditionalPlaceType
+}
+
+entity "TripResponseDto" {
+    * Id : int
+    --
+    Name : string
+    Theme : string
+    Description : string
+    Length : float
+    Rating : float
+}
+
+User ||--o{ Review : "writes"
+User ||--o{ Subscription : "subscribes"
+User ||--o{ TripResponseDto : "owns"
+RouteMainPage ||--o{ Review : "has"
+RouteMainPage ||--o{ Point : "contains"
+RouteMainPage ||--o{ Subscription : "is part of"
+RoutePostResponseDto ||--o{ PlaceInfoResponseDto : "includes"
+RoutePostResponseDto ||--o{ AdditionalPlaceInfoResponseDto : "includes"
+RoutePostResponseDto ||--o{ Review : "has"
+RoutePostResponseDto ||--o{ Point : "contains"
+Place ||--o{ AdditionalPlace : "has"
+TripResponseDto ||--o{ Place : "includes"
+TripResponseDto ||--o{ AdditionalPlace : "includes"
+TripResponseDto ||--o{ User : "belongs to"
+
+@enduml
+
+@startuml
+
+title Services Module Classes (Grid Layout)
+
+skinparam class {
+    BackgroundColor<<Service>> LightBlue
+    BorderColor<<Service>> Black
+}
+
+package "Services" {
+    class CurrentUserService <<Service>> {
+        +GetCurrentUser(): User
+    }
+
+    class LocationSyncService <<Service>> {
+        +Start(): Task
+        +Stop(): Task
+    }
+
+    class MarkService <<Service>> {
+        +GetMarksAsync(): Task<List<Mark>>
+        +GetMarksByUserIdAsync(userId: int): Task<List<Mark>>
+        +GetMarksByTripIdAsync(tripId: int): Task<List<Mark>>
+    }
+
+    class PointsAnotherService <<Service>> {
+        +GetRouteAsync(points: IEnumerable<PlaceInfoResponseDto>, apiKey: string, mode: string): Task<JObject>
+    }
+
+    class PointsService <<Service>> {
+        +GetRouteAsync(points: List<Point>, apiKey: string, mode: string): Task<JObject>
+    }
+
+    class RouteService <<Service>> {
+        +GetRoutesAsync(): Task<List<RouteMainPage>>
+        +Update(updatedRoute: RouteMainPage): Task
+        +GetRoutesByMarkTypeAsync(markType: MarkType): Task<List<RouteMainPage>>
+        +GetRouteForMapPageAsync(routeId: int): Task<RouteFollowingMap>
+        +SaveRouteState(route: RouteFollowingMap): void
+        +LoadRouteState(routeId: int): RouteFollowingMap?
+        +UpdatePlaceStatus(routeId: int, placeId: int, isCompleted: bool): void
+        +GetMockRoutePostResponseDto(): Task<RoutePostResponseDto>
+    }
+
+    class ServiceHelper <<Service>> {
+        +GetService<T>(): T
+    }
+
+    class SubscriptionService <<Service>> {
+        +GetSubscriptionsAsync(): Task<List<Subscription>>
+    }
+
+    class UserService <<Service>> {
+        +GetUsersAsync(): Task<List<User>>
+    }
+
+    class WeatherService <<Service>> {
+        +GetWeatherAsync(): Task<WeatherCurrent>
+    }
+}
+
+' Arrange classes in a grid-like structure manually
+CurrentUserService -[hidden]-> LocationSyncService
+LocationSyncService -[hidden]-> MarkService
+MarkService -[hidden]-> PointsAnotherService
+PointsAnotherService -[hidden]-> PointsService
+PointsService -[hidden]-> RouteService
+RouteService -[hidden]-> ServiceHelper
+ServiceHelper -[hidden]-> SubscriptionService
+SubscriptionService -[hidden]-> UserService
+UserService -[hidden]-> WeatherService
+
+@enduml

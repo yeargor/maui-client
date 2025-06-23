@@ -1,18 +1,20 @@
 <?xml version = "1.0" encoding = "UTF-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:viewmodels="clr-namespace:MauiDemo2.ViewModel"
-             xmlns:models="clr-namespace:MauiDemo2.Models"
+             xmlns:viewmodels="clr-namespace:MauiDemo2.ViewModels"
+             xmlns:models="clr-namespace:MauiDemo2.Models.Route"
              xmlns:converters="clr-namespace:MauiDemo2.Converters"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             xmlns:sharpnado="clr-namespace:Sharpnado.MaterialFrame;assembly=Maui.MaterialFrame"
              x:Class="MauiDemo2.Views.CardPage"
              x:DataType="viewmodels:CardViewModel"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="True"
              BackgroundColor="#FFFCF1">
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:RatingToStarsConverter x:Key="RatingToStarsConverter"/>
             <converters:FavoriteToHeartConverter x:Key="FavoriteToHeartConverter"/>
+            <converters:DateToDaysAgoConverter x:Key="DateToDaysAgoConverter"/>
             <Style TargetType="Label">
                 <Setter Property="FontFamily" Value="Inter-Regular" />
             </Style>
@@ -22,25 +24,34 @@
             </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
-    
+
     <Grid>
         <ScrollView Padding="15">
             <VerticalStackLayout Spacing="10">
                 <Grid ColumnDefinitions="*, Auto"
                       ColumnSpacing ="20"
                       HeightRequest="38"
-                      Margin="20,0,20,10">
+                      Margin="20,0,20,20">
                     <Border StrokeShape="RoundRectangle 10"
                             StrokeThickness="0"
                             HorizontalOptions="FillAndExpand"
                             BackgroundColor="White"
                             Grid.Column="0">
-                        <Image Source="glass.svg"
-                               HeightRequest="22"
-                               WidthRequest="22"
-                               VerticalOptions="Center"
-                               HorizontalOptions="Start"
-                               Margin="10"/>
+                        <Grid ColumnDefinitions="Auto,*">
+                            <Image Source="glass.svg"
+                                   HeightRequest="22"
+                                   WidthRequest="22"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Start"
+                                   Margin="10"/>
+                            <Entry Grid.Column="1"
+                                   Placeholder="Поиск маршрута..."
+                                   Text="{Binding SearchText, Mode=TwoWay}"
+                                   BackgroundColor="Transparent"
+                                   FontSize="14"
+                                   VerticalOptions="Center"
+                                   Margin="0,0,10,0"/>
+                        </Grid>
                         <Border.Shadow>
                             <Shadow Brush="#343330" 
                                     Opacity="0.4" 
@@ -71,9 +82,9 @@
                         </Border.GestureRecognizers>
                     </Border>
                 </Grid>
-                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Routes}">
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding FilteredRoutes}">
                     <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="models:RouteMainPage">
+                        <DataTemplate x:DataType="models:RouteCardResponseDto">
                             <VerticalStackLayout>
                                 <Grid  ColumnDefinitions="*, Auto"
                                        ColumnSpacing="20"
@@ -86,12 +97,10 @@
                                                 WidthRequest="45"
                                                 HorizontalOptions="Start"
                                                 VerticalOptions="Center">
-                                            <Image Source="glass.svg"
-                                                   HeightRequest="22"
-                                                   WidthRequest="22"
-                                                   VerticalOptions="Center"
-                                                   HorizontalOptions="Center"
-                                                   Margin="10"/>
+                                            <Image Source="{Binding UserInfo.ImageUrl}"
+                                                   HorizontalOptions="Fill"
+                                                   VerticalOptions="Fill"
+                                                   Aspect="AspectFill"/>
                                             <Border.Shadow>
                                                 <Shadow Brush="#343330"
                                                         Opacity="0.4"
@@ -99,12 +108,12 @@
                                                         Radius="6" />
                                             </Border.Shadow>
                                         </Border>
-                                        <Label Text="Wilson Press"
+                                        <Label Text="{Binding UserInfo.Username}"
                                                FontSize="14"
                                                TextColor="Black"
                                                VerticalOptions="Center"/>
                                     </HorizontalStackLayout>
-                                    <Label Text="3 дня назад"
+                                    <Label Text="{Binding RouteInfo.CreatedAt, Converter={StaticResource DateToDaysAgoConverter}}"
                                            FontSize="13"
                                            TextColor="Black"
                                            VerticalOptions="End"
@@ -124,7 +133,7 @@
                                     <Grid RowDefinitions="200, Auto, Auto, Auto"
                                                 RowSpacing="5"
                                                 HorizontalOptions="FillAndExpand">
-                                        <CarouselView ItemsSource="{Binding Images}"
+                                        <CarouselView ItemsSource="{Binding RouteInfo.ImagesUrls}"
                                                             Grid.Row="0">
                                             <CarouselView.ItemTemplate>
                                                 <DataTemplate>
@@ -143,20 +152,24 @@
                                         </CarouselView>
                                         <Label Grid.Row="0"
                                                    Grid.Column="0"
-                                                   Text="{Binding Name}"
+                                                   Text="{Binding RouteInfo.RouteTitle}"
                                                    FontSize="16"
                                                    TextColor="Black"
                                                    VerticalOptions="Start"
                                                    HorizontalOptions="Start"
                                                    Margin="20,15,0,0"/>
                                         <Image Grid.Row="0"
-                                                   Grid.Column="1"
-                                                   Source="{Binding IsFavorite, Converter={StaticResource FavoriteToHeartConverter}}"
-                                                   WidthRequest="30"
-                                                   HeightRequest="30"
-                                                   VerticalOptions="Start"
-                                                   HorizontalOptions="End"
-                                                   Margin="0,15,20,0"/>
+                                               Grid.Column="1"
+                                               Source="{Binding RouteInfo.UserLike, Converter={StaticResource FavoriteToHeartConverter}}"
+                                               WidthRequest="30"
+                                               HeightRequest="30"
+                                               VerticalOptions="Start"
+                                               HorizontalOptions="End"
+                                               Margin="0,15,20,0">
+                                            <Image.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CardViewModel}}, Path=UpdateFavoriteCommand}" CommandParameter="{Binding .}" />
+                                            </Image.GestureRecognizers>
+                                        </Image>
                                         <VerticalStackLayout Grid.Row="0"
                                                                  Grid.Column="0"
                                                                  VerticalOptions="End"
@@ -172,7 +185,7 @@
                                                         <toolkit:IconTintColorBehavior TintColor="#343330" />
                                                     </Image.Behaviors>
                                                 </Image>
-                                                <Label Text="{Binding Distance, StringFormat='{}{0} km'}"
+                                                <Label Text="{Binding RouteInfo.RouteDistance, StringFormat='{}{0} km'}"
                                                            FontSize="15"
                                                            TextColor="Black"
                                                            VerticalOptions="Center"/>
@@ -180,22 +193,21 @@
                                             <HorizontalStackLayout Spacing="5">
                                                 <Image Source="run.svg"
                                                            HeightRequest="17"
-                                                           WidthRequest="17"
                                                            VerticalOptions="Center"/>
-                                                <Label Text="{Binding TimesCompleted}"  
+                                                <Label Text="{Binding UserCount}"  
                                                            FontSize="11"
                                                            TextColor="Black"
                                                            VerticalOptions="Center"/>
                                             </HorizontalStackLayout>
                                             <HorizontalStackLayout Spacing="5">
-                                                <HorizontalStackLayout Spacing="5" HorizontalOptions="Start" BindableLayout.ItemsSource="{Binding Rating, Converter={StaticResource RatingToStarsConverter}}">
+                                                <HorizontalStackLayout Spacing="5" HorizontalOptions="Start" BindableLayout.ItemsSource="{Binding RouteInfo.RouteRating, Converter={StaticResource RatingToStarsConverter}}">
                                                     <BindableLayout.ItemTemplate>
                                                         <DataTemplate>
                                                             <Image Source="{Binding .}" WidthRequest="14" HeightRequest="15" />
                                                         </DataTemplate>
                                                     </BindableLayout.ItemTemplate>
                                                 </HorizontalStackLayout>
-                                                <Label Text="{Binding Rating}"
+                                                <Label Text="{Binding RouteInfo.RouteRating}"
                                                             FontSize="12"
                                                             TextColor="Black"
                                                             VerticalOptions="Center" />
@@ -208,7 +220,7 @@
                                                            HorizontalOptions="Center"
                                                            IndicatorSize="7"/>
                                         <CarouselView Grid.Row="2"
-                                                          ItemsSource="{Binding DescriptionParts}"
+                                                          ItemsSource="{Binding RouteInfo.DescriptionParts}"
                                                           HorizontalOptions="FillAndExpand"
                                                           IsBounceEnabled="False"
                                                           PeekAreaInsets="0"
@@ -226,7 +238,23 @@
                                                 </DataTemplate>
                                             </CarouselView.ItemTemplate>
                                         </CarouselView>
+                                        <Button Text="Пройти маршрут"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CardViewModel}}, Path=OpenRouteFollowingCommand}"
+                                                CommandParameter="{Binding .}"
+                                                BackgroundColor="#FDA895"
+                                                TextColor="White"
+                                                WidthRequest="100"
+                                                HeightRequest="37"
+                                                HorizontalOptions="End"
+                                                CornerRadius="15"
+                                                VerticalOptions="End"
+                                                Margin="15"/>
                                     </Grid>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer 
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CardViewModel}}, Path=OpenRouteFromCardCommand}" 
+                                                CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
                                 </Border>
                             </VerticalStackLayout>
                         </DataTemplate>
@@ -234,6 +262,18 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>
+        <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#F17256" HeightRequest="60" VerticalOptions="Center" HorizontalOptions="Center"/>
+        <BoxView x:Name="DimOverlay"
+                 Color="Black"
+                 Opacity="0.5"
+                 IsVisible="{Binding IsFlyoutVisible}"
+                 HorizontalOptions="FillAndExpand"
+                 VerticalOptions="FillAndExpand"
+                 InputTransparent="False">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ToggleFlyoutCommand}" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
         <Grid x:Name="FlyoutMenu"
               BackgroundColor="White"
               WidthRequest="250"

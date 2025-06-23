@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiDemo2.Views.RouteDetailsPage"
+             xmlns:converters="clr-namespace:MauiDemo2.Converters"
+             xmlns:maps="http://schemas.microsoft.com/dotnet/2021/maui/maps"
+             xmlns:models="clr-namespace:MauiDemo2.Models"
+             xmlns:tabs="http://sharpnado.com"
+             xmlns:viewmodels="clr-namespace:MauiDemo2.ViewModels"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:RatingToStarsConverter x:Key="RatingToStarsConverter"/>
+            <converters:DateTimeToFormattedStringConverter x:Key="DateTimeConverter"/>
+            <converters:FavoriteToHeartConverter x:Key="FavoriteToHeartConverter"/>
+            <converters:RouteTypeToIconConverter x:Key="RouteTypeToIconConverter"/>
+            <converters:StarRatingConverter x:Key="StarRatingConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*">
+            <Border Grid.Row="0" StrokeThickness="0">
+                <maps:Map
+                        x:Name="RouteMap"
+                        ItemsSource="{Binding LocationPins}"
+                        HorizontalOptions="FillAndExpand"
+                        VerticalOptions="Start"
+                        IsScrollEnabled="False"
+                        IsZoomEnabled="False"
+                        HeightRequest="170"
+                        AbsoluteLayout.LayoutBounds="0,0,1,1"
+                        AbsoluteLayout.LayoutFlags="All">
+                    <maps:Map.ItemTemplate>
+                        <DataTemplate x:DataType="{x:Type models:LocationPin}">
+                            <models:CustomPin
+                                Location="{Binding Location}"
+                                Address="{Binding Address}"
+                                Label="{Binding Description}"
+                                ImageSource="{Binding ImageSource}"
+                                Type="Place"
+                                OrderOfVisit="{Binding OrderOfVisit}" />
+                        </DataTemplate>
+                    </maps:Map.ItemTemplate>
+                </maps:Map>
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="0,0,25,25" />
+                </Border.StrokeShape>
+            </Border>
+
+            <Border StrokeShape="Ellipse"
+                    StrokeThickness="0"
+                    BackgroundColor="White"
+                    HeightRequest="32"
+                    WidthRequest="32"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Start"
+                    Margin="15, 20 ,0 ,0">
+                <Image Source="arrow.svg"
+                    HeightRequest="22"
+                    WidthRequest="22"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding NavigateToCardPageCommand}" />
+                    </Image.GestureRecognizers>
+                </Image>
+            </Border>
+
+            <StackLayout Grid.Row="1" VerticalOptions="Start">
+                <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="Auto, *" VerticalOptions="Start" Margin="0,-20,0,0" Padding="10,3,10,10">
+                    <Border Grid.Row="0"
+                            Grid.Column="0" 
+                            Margin="10,0,0,0"
+                            StrokeShape="Ellipse" 
+                            StrokeThickness="0" 
+                            BackgroundColor="Transparent" 
+                            VerticalOptions="Center" 
+                            HorizontalOptions="Center">
+                        <Image Source="{Binding CurrentRoute.RouteInfo.RouteType, Converter={StaticResource RouteTypeToIconConverter}}"
+                            Aspect="AspectFit"
+                            HeightRequest="40.18" 
+                            WidthRequest="40.18" 
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"/>
+                        <Border.Shadow>
+                            <Shadow Brush="#343330" 
+                                    Opacity="0.4" 
+                                    Offset="0,4" 
+                                    Radius="6" />
+                        </Border.Shadow>
+                    </Border>
+                    <Border  Grid.Row="0"
+                            StrokeShape="RoundRectangle 10"
+                            StrokeThickness="0"
+                            HorizontalOptions="Start"
+                            Margin="12,0,0,0"
+                            HeightRequest="38" 
+                            BackgroundColor="White"
+                            Grid.Column="1">
+                        <Label Text="{Binding CurrentRoute.RouteInfo.RouteType}" FontSize="12" Padding="24,10,24,10" VerticalOptions="Center" HorizontalOptions="Center" TextColor="Black" />
+                        <Border.Shadow>
+                            <Shadow Brush="#343330" 
+                                    Opacity="0.4" 
+                                    Offset="0,4" 
+                                    Radius="6" />
+                        </Border.Shadow>
+                    </Border>
+                    <StackLayout Margin="10,10,0,0"
+                                Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="20" VerticalOptions="Start" HorizontalOptions="Start">
+                         <Grid VerticalOptions="Center" HorizontalOptions="Center">
+                            <Image Source="trip_colored.svg" WidthRequest="25" HeightRequest="25" VerticalOptions="Center" HorizontalOptions="Start" Margin="0,0,0,0" />
+                            <Label Text="{Binding CurrentRoute.RouteInfo.RouteDistance, StringFormat='{0} м'}" TextColor="#F17256" FontSize="15" VerticalOptions="Center" HorizontalOptions="End" Margin="30,0,0,0" />
+                        </Grid>
+                         <Grid VerticalOptions="Center" HorizontalOptions="Center">
+                            <Image Source="clock.svg" WidthRequest="25" HeightRequest="25" VerticalOptions="Center" HorizontalOptions="Start" Margin="0,0,0,0" />
+                            <Label Text="{Binding CurrentRoute.RouteTime, StringFormat='{0} мин'}" TextColor="#F17256" FontSize="15" VerticalOptions="Center" HorizontalOptions="End" Margin="30,0,0,0" />
+                        </Grid>
+                    </StackLayout>
+                </Grid>
+                <Label Text="{Binding CurrentRoute.RouteInfo.RouteTitle}" FontSize="20" TextColor="Black" VerticalOptions="Start" HorizontalOptions="Start" Margin="22,0,22,0" />
+                <HorizontalStackLayout Spacing="5" Margin="22,2,0,0" >
+                    <HorizontalStackLayout Spacing="2" HorizontalOptions="Start" BindableLayout.ItemsSource="{Binding CurrentRoute.RouteInfo.RouteRating, Converter={StaticResource RatingToStarsConverter}}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding .}" WidthRequest="14" HeightRequest="15" />
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </HorizontalStackLayout>
+                    <Label Text="{Binding CurrentRoute.RouteInfo.RouteRating}"
+                                FontSize="12"
+                                TextColor="Black"
+                                VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <Grid RowDefinitions="Auto,Auto,Auto"
+                      Padding="20,0,20,0">
+                    <tabs:TabHostView x:Name="TabHost"
+                                    SelectedIndex="0"
+                                    Grid.Row="0"
+                                    HeightRequest="50"
+                                    BackgroundColor="White"
+                                    TabType="Fixed"
+                                    UseMauiTapGesture="True">
+                        <tabs:UnderlinedTabItem Label="Описание"
+                                                SelectedTabColor="#FFD659" 
+                                                UnselectedLabelColor="#A3A3A3" 
+                                                LabelSize="10"
+                                                Margin="10,5,10,0" 
+                                                HorizontalOptions= "Center"
+                                                FontFamily="Inter-Bold" />
+                         <tabs:UnderlinedTabItem Label="Маршрут"
+                                                SelectedTabColor="#FFD659" 
+                                                UnselectedLabelColor="#A3A3A3" 
+                                                LabelSize="10"
+                                                Margin="10,5,10,0" 
+                                                HorizontalOptions= "Center"
+                                                FontFamily="Inter-Bold" />
+                         <tabs:UnderlinedTabItem Label="Фото"
+                                                SelectedTabColor="#FFD659" 
+                                                UnselectedLabelColor="#A3A3A3" 
+                                                LabelSize="10"
+                                                Margin="10,5,10,0" 
+                                                HorizontalOptions= "Center"
+                                                FontFamily="Inter-Bold" />
+                         <tabs:UnderlinedTabItem Label="Отзывы"
+                                                SelectedTabColor="#FFD659" 
+                                                UnselectedLabelColor="#A3A3A3" 
+                                                LabelSize="10"
+                                                Margin="10,5,10,0" 
+                                                HorizontalOptions= "Center"
+                                                FontFamily="Inter-Bold" />
+                    </tabs:TabHostView>
+                    <BoxView HeightRequest="1"
+                            BackgroundColor="#FFD659"
+                            Grid.Row="1"
+                            HorizontalOptions="FillAndExpand"/>
+                    <tabs:ViewSwitcher HorizontalOptions="FillAndExpand"
+                                VerticalOptions="FillAndExpand"
+                                x:Name="Switcher"
+                                Grid.Row="2"
+                                SelectedIndex="{Binding Source={x:Reference TabHost}, Path=SelectedIndex}">
+                        <VerticalStackLayout Spacing="10" Padding="10">
+                            <Label Text="{Binding CurrentRoute.RouteInfo.RouteDescription}" 
+                                FontSize="12" 
+                                TextColor="Black"/>
+                            
+                            <HorizontalStackLayout Spacing="0">
+                                <Label Text="Автор: " 
+                                    TextColor="Black" 
+                                    FontSize="12"/>
+                                <Label Text="{Binding CurrentRoute.AuthorUsername}" 
+                                    TextColor="#F34C27" 
+                                    FontSize="12" 
+                                    FontAttributes="Bold"/>
+                            </HorizontalStackLayout>
+                            
+                            <HorizontalStackLayout Spacing="0">
+                                <Label Text="Опубликовано: " 
+                                    TextColor="Black" 
+                                    FontSize="12"/>
+                                <Label Text="{Binding CurrentRoute.RouteInfo.CreatedAt, Converter={StaticResource DateTimeConverter}}" 
+                                        TextColor="Black" 
+                                        FontSize="12"/>
+                                </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                        <Grid ColumnDefinitions="*,1,*" 
+                                ColumnSpacing="0"
+                                Padding="10">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label Text="Основные" 
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        TextColor="Black"
+                                        Margin="0,0,0,10"/>
+                                    
+                                    <CollectionView ItemsSource="{Binding PlacesForRoute}"
+                                            EmptyView="Загрузка данных...">
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Label FontSize="12" TextColor="Black" Margin="0,0,0,5">
+                                                    <Label.FormattedText>
+                                                        <FormattedString>
+                                                            <Span Text="{Binding OrderOfVisit, StringFormat='{0}.'}"/>
+                                                            <Span Text=" "/>
+                                                            <Span Text="{Binding LocationInfo.LocationName}"/>
+                                                        </FormattedString>
+                                                    </Label.FormattedText>
+                                                </Label>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+                                </VerticalStackLayout>
+                                
+                                <BoxView Grid.Column="1"
+                                        WidthRequest="1"
+                                        BackgroundColor="LightGray"
+                                        VerticalOptions="FillAndExpand"/>
+                                
+                                <VerticalStackLayout Grid.Column="2">
+                                    <Label Text="Дополнительные" 
+                                        FontSize="14"
+                                        HorizontalOptions="End"
+                                        FontAttributes="Bold"
+                                        TextColor="#7D7D7D"
+                                        Margin="0,0,0,10"/>
+                                    
+                                   <CollectionView ItemsSource="{Binding AdditionalPlacesForRoute}"
+                                            EmptyView="Нет дополнительных точек">
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Label Text="{Binding LocationInfo.LocationName}"
+                                                    FontSize="12"
+                                                    TextColor="#7D7D7D"
+                                                    HorizontalOptions="End"
+                                                    Margin="0,0,0,5"/>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+                                </VerticalStackLayout>
+                            </Grid>
+                           <Border StrokeThickness="0"
+                                    Margin="10,10,10,0"
+                                    Padding="0">
+                                <CollectionView ItemsSource="{Binding Images}"
+                                                HorizontalOptions="FillAndExpand"
+                                                VerticalOptions="Start"
+                                                HeightRequest="150">
+                                    <CollectionView.ItemsLayout>
+                                        <LinearItemsLayout ItemSpacing="0" Orientation="Horizontal" />
+                                    </CollectionView.ItemsLayout>
+                                    
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border StrokeThickness="0"
+                                                    Padding="8"
+                                                    WidthRequest="150"
+                                                    HeightRequest="150"
+                                                    VerticalOptions="FillAndExpand">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="20"/>
+                                                </Border.StrokeShape>
+                                                 <Border StrokeThickness="0"
+                                                        Background="Transparent">
+                                                    <Border.StrokeShape>
+                                                        <RoundRectangle CornerRadius="10"/>
+                                                    </Border.StrokeShape>
+                                                    <Image Source="{Binding .}"
+                                                            Aspect="AspectFill"
+                                                            Margin="-5"
+                                                            HorizontalOptions="FillAndExpand"
+                                                            VerticalOptions="FillAndExpand">
+                                                       <Image.GestureRecognizers>
+                                                            <TapGestureRecognizer 
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:RouteDetailsViewModel}}, Path=ShowImageFullscreenCommand}"
+                                                                CommandParameter="{Binding .}"/>
+                                                        </Image.GestureRecognizers>
+                                                    </Image>
+                                                </Border>
+                                                <Border.Shadow>
+                                                    <Shadow Brush="#343330" 
+                                                            Opacity="0.2" 
+                                                            Offset="0,4" 
+                                                            Radius="3" />
+                                                </Border.Shadow>
+                                            </Border>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </Border>
+                        <Grid RowDefinitions="*,*">
+                            <Border StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 20"
+                                        Stroke="#F17256"
+                                        Padding="17,8,17,8"
+                                        Margin="10,20,0,0"
+                                        HorizontalOptions="Start"
+                                        Grid.Row="0"
+                                        BackgroundColor="Transparent">
+                                <HorizontalStackLayout>
+                                    <Label Text="Добавить отзыв" TextColor="#F17256" FontSize="12" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    <Image Source="plusred.svg"
+                                                    HeightRequest="14"
+                                                    WidthRequest="14"
+                                                    Margin="5,0,0,0"
+                                                    VerticalOptions="Center"
+                                                    HorizontalOptions="Center">
+                                    </Image>
+                                </HorizontalStackLayout>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer 
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:RouteDetailsViewModel}}, Path=ShowAddReviewFullscreenCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                             <CollectionView x:Name="ReviewsCollectionView"
+                                            ItemsSource="{Binding CurrentRoute.Reviews}"
+                                            Grid.Row="1"
+                                            HorizontalScrollBarVisibility="Never"
+                                            VerticalScrollBarVisibility="Never"
+                                            Margin="0,10,0,10"
+                                            EmptyView="Пока нет отзывов">
+                                    <CollectionView.ItemsLayout>
+                                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="0"/>
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:Review">
+                                            <Grid Padding="10,10,10,15">
+                                                <Border WidthRequest="184"
+                                                        HeightRequest="115"
+                                                        HorizontalOptions="Start"
+                                                        StrokeShape="RoundRectangle 8"
+                                                        StrokeThickness="0"
+                                                        BackgroundColor="#FFFCF0">
+                                                    <Grid RowDefinitions="Auto,Auto,Auto"
+                                                        Margin="16,12,16,12">
+                                                        <HorizontalStackLayout Grid.Row="0" Spacing="8">
+                                                            <Border StrokeShape="Ellipse"
+                                                                    StrokeThickness="0"
+                                                                    BackgroundColor="Transparent"
+                                                                    HeightRequest="25"
+                                                                    WidthRequest="25"
+                                                                    HorizontalOptions="Start"
+                                                                    VerticalOptions="Center">
+                                                                <Image Source="{Binding UserImageUrl}"
+                                                                    VerticalOptions="Center"
+                                                                    HorizontalOptions="Center"/>
+                                                            </Border>
+                                                            <Label Text="{Binding Username}"
+                                                                FontSize="12"
+                                                                TextColor="Black"
+                                                                VerticalOptions="Center"/>
+                                                        </HorizontalStackLayout>
+                                                    <HorizontalStackLayout Grid.Row="1" Spacing="5" Margin="0,8,0,0" >
+                                                            <HorizontalStackLayout Spacing="2" HorizontalOptions="Start" BindableLayout.ItemsSource="{Binding Grade, Converter={StaticResource RatingToStarsConverter}}">
+                                                                <BindableLayout.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <Image Source="{Binding .}" WidthRequest="14" HeightRequest="15" />
+                                                                    </DataTemplate>
+                                                                </BindableLayout.ItemTemplate>
+                                                            </HorizontalStackLayout>
+                                                        </HorizontalStackLayout>
+                                                        <Label Text="{Binding ReviewText}" 
+                                                            Grid.Row="2"
+                                                            FontSize="9"
+                                                            TextColor="Black"
+                                                            Margin="0,4,0,10"/>
+                                                    </Grid>
+                                                    <Border.Shadow>
+                                                        <Shadow Brush="#343330" 
+                                                                Opacity="0.4" 
+                                                                Offset="0,4" 
+                                                                Radius="6" />
+                                                    </Border.Shadow>
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                        </Grid>
+                    </tabs:ViewSwitcher>
+                </Grid>
+            </StackLayout>
+
+            <HorizontalStackLayout Grid.Row="2"
+                                    HorizontalOptions="Center"
+                                    Margin="0,0,0,20">
+                <Border 
+                    StrokeShape="RoundRectangle 20"
+                    StrokeThickness="0"
+                    HeightRequest="36"
+                    VerticalOptions="End"
+                    BackgroundColor="#F17256"
+                    Grid.Column="1">
+                    <Label Text="Начать маршрут" FontSize="14" Padding="20,0,20,0" VerticalOptions="Center" HorizontalOptions="Center" TextColor="White" />
+                </Border>
+                <Image Source="{Binding CurrentRoute.RouteInfo.IsFavorite, Converter={StaticResource FavoriteToHeartConverter}}"
+                        WidthRequest="30"
+                        HeightRequest="30"
+                        Margin="15,0,15,0"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center">
+                       <Image.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding UpdateFavoriteCommand}" />
+                        </Image.GestureRecognizers>
+                    </Image>
+            </HorizontalStackLayout>
+            <Grid x:Name="FullscreenImageOverlay"
+                    Grid.RowSpan="3"
+                    IsVisible="{Binding IsFullscreenImageVisible}"
+                    BackgroundColor="#80000000"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Fill"
+                    InputTransparent="False"
+                    ZIndex="9999">
+                     <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CloseFullscreenImageCommand}" />
+                    </Grid.GestureRecognizers>
+                    
+                    <Border StrokeThickness="0"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="0"
+                            Margin="20,70,20,70"
+                            HorizontalOptions="Fill"
+                            InputTransparent="False"
+                            VerticalOptions="Fill">
+                        <Grid>
+                          <Border StrokeShape="Ellipse"
+                                    StrokeThickness="0"
+                                    BackgroundColor="White"
+                                    HeightRequest="32"
+                                    WidthRequest="32"
+                                    Padding="2"
+                                    HorizontalOptions="End"
+                                    VerticalOptions="Start"
+                                    ZIndex="2"
+                                    Margin="15,20,20,0">
+                                <Image Source="cross.svg"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center">
+                                    <Image.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding CloseFullscreenImageCommand}" />
+                                    </Image.GestureRecognizers>
+                                </Image>
+                            </Border>
+                            <Image Source="{Binding SelectedImage}"
+                                Aspect="AspectFill"
+                                 InputTransparent="False"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            <Grid x:Name="FullScreenAddReviewOverlay"
+      Grid.RowSpan="3"
+      IsVisible="{Binding IsFullscreenAddReviewVisible}"
+      BackgroundColor="#80000000"
+      HorizontalOptions="Fill"
+      VerticalOptions="Fill"
+      InputTransparent="False"
+      ZIndex="9999">
+    <Border StrokeShape="Ellipse"
+            StrokeThickness="0"
+            BackgroundColor="White"
+            HeightRequest="32"
+            WidthRequest="32"
+            Padding="2"
+            HorizontalOptions="End"
+            VerticalOptions="Start"
+            ZIndex="2"
+            Margin="15,20,20,0">
+        <Image Source="cross.svg"
+            VerticalOptions="Center"
+            HorizontalOptions="Center">
+            <Image.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CloseFullscreenAddReviewCommand}" />
+            </Image.GestureRecognizers>
+        </Image>
+    </Border>
+    <Border WidthRequest="280"
+            HeightRequest="269"
+            HorizontalOptions="Center"
+            StrokeShape="RoundRectangle 8"
+            StrokeThickness="0"
+            BackgroundColor="#FFFCF0">
+        <Grid RowDefinitions="Auto,Auto,Auto,*"
+              Margin="24,12,24,12">
+            <HorizontalStackLayout Grid.Row="0" Spacing="8">
+                <Border StrokeShape="Ellipse"
+                        StrokeThickness="0"
+                        BackgroundColor="Transparent"
+                        HeightRequest="25"
+                        WidthRequest="25"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center">
+                    <Image Source="user2"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"/>
+                </Border>
+                <Label Text="Wilson Press"
+                    FontSize="12"
+                    TextColor="Black"
+                    VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+            <FlexLayout Grid.Row="1"
+                        Direction="Row"
+                        Wrap="NoWrap"
+                        BindableLayout.ItemsSource="{Binding StarList}"
+                        HorizontalOptions="CenterAndExpand"
+                        VerticalOptions="Start"
+                        Margin="0,20,0,0">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <Path Fill="{Binding StarColor}"
+                              Margin="4,0"
+                              HeightRequest="32"
+                              WidthRequest="32"
+                              Aspect="Uniform"
+                              VerticalOptions="Start"
+                              Data="M50 0 L61.8 38 H100 L70.9 61.8 L82.7 100 L50 77.2 L17.3 100 L29.1 61.8 L0 38 H38.2 Z">
+                            <Path.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Path=BindingContext.StarRatingClickedCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}"/>
+                            </Path.GestureRecognizers>
+                        </Path>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+            <Editor Grid.Row="2"
+                    Placeholder="Оставьте свой отзыв здесь"
+                    AutoSize="TextChanges"
+                    MaxLength="500"
+                    Margin="0,12,0,0"
+                    FontSize="14"
+                    Text="{Binding ReviewText}"/>
+            <Button Grid.Row="3"
+                    Text="Отправить отзыв"
+                    Margin="0,20,0,0"
+                    BackgroundColor="#F17256"
+                    TextColor="White"
+                    Command="{Binding SubmitReviewCommand}"/>
+        </Grid>
+    </Border>
+</Grid>
+        </Grid>
+    </ScrollView>
+</ContentPage>

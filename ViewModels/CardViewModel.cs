@@ -1,25 +1,66 @@
 ﻿using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MauiDemo2.Dtos;
+using MauiDemo2.Messages;
 using MauiDemo2.Models;
+using MauiDemo2.Models.Common;
+using MauiDemo2.Models.Route;
+using MauiDemo2.Services;
 using MauiDemo2.Views;
 using MauiDemo2.WebClients;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
-namespace MauiDemo2.ViewModel
+namespace MauiDemo2.ViewModels
 {
     public partial class CardViewModel : ObservableObject
     {
-        public ObservableCollection<RouteMainPage> Routes { get; set; } = new ObservableCollection<RouteMainPage>();
+        private ObservableCollection<RouteCardResponseDto> _routes = new ObservableCollection<RouteCardResponseDto>();
+        public ObservableCollection<RouteCardResponseDto> Routes
+        {
+            get => _routes;
+            set
+            {
+                _routes = value;
+                OnPropertyChanged(nameof(Routes));
+            }
+        }
+
+        private string _searchText = String.Empty;
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                if (_searchText != value)
+                {
+                    _searchText = value;
+                    OnPropertyChanged(nameof(SearchText));
+                    FilterRoutes();
+                }
+            }
+        }
+
+        private ObservableCollection<RouteCardResponseDto> _filteredRoutes = new();
+        public ObservableCollection<RouteCardResponseDto> FilteredRoutes
+        {
+            get => _filteredRoutes;
+            set
+            {
+                _filteredRoutes = value;
+                OnPropertyChanged(nameof(FilteredRoutes));
+            }
+        }
 
         [ObservableProperty]
-        bool isBusy;
-        [ObservableProperty]
-        string message;
+        private bool isBusy;
+
         [ObservableProperty]
         private bool isFlyoutVisible;
+
+        private readonly RouteService _routeService;
 
         public IAsyncRelayCommand GetRoutesCommand { get; }
         public ICommand ToggleFavoriteCommand { get; }
@@ -30,29 +71,31 @@ namespace MauiDemo2.ViewModel
         public ICommand OpenNotificationsCommand { get; }
         public ICommand OpenRouteDetailsCommand { get; }
         public ICommand ToggleFlyoutCommand { get; }
+        public ICommand UpdateFavoriteCommand => new RelayCommand<RouteCardResponseDto>((route) => UpdateFavorite(route));
+        public ICommand OpenRouteFollowingCommand => new RelayCommand<RouteCardResponseDto>(OpenRouteFollowingPage);
+        public ICommand StartRouteCommand { get; }
 
-        private readonly IMapper _mapper;
-        private readonly string lorem = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.";
-
-        public CardViewModel(IMapper mapper)
+        public CardViewModel(RouteService routeService)
         {
-            GetRoutesCommand = new AsyncRelayCommand(GetRoutes);
-            ToggleFavoriteCommand = new RelayCommand<RouteMainPage>(ToggleFavorite);
+            _routeService = routeService ?? throw new ArgumentNullException(nameof(routeService));
+
+            GetRoutesCommand = new AsyncRelayCommand(LoadRoutesAsync);
             OpenProfileCommand = new RelayCommand(OpenProfile);
             OpenUserPageCommand = new RelayCommand(OpenUserPage);
             OpenSettingsCommand = new RelayCommand(OpenSettings);
             OpenRouteFollowCommand = new RelayCommand(OpenRouteFollow);
             OpenNotificationsCommand = new RelayCommand(OpenNotifications);
-            OpenRouteDetailsCommand = new RelayCommand<RouteMainPage>(OpenRouteDetails);
+            OpenRouteDetailsCommand = new RelayCommand<RouteCardResponseDto>(OpenRouteDetails);
             ToggleFlyoutCommand = new RelayCommand(ToggleFlyout);
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            StartRouteCommand = new Command(StartRoute);
+            // _routeService.RouteUpdated += OnRouteUpdated;
+            WeakReferenceMessenger.Default.Register<RouteUpdatedMessage>(this, (r, msg) =>
+            {
+                var (routeId, userLike) = msg.Value;
+                OnRouteUpdated(routeId, userLike);
+            });
 
-            _ = GetRoutes();
-        }
-        private void ToggleFlyout()
-        {
-            System.Diagnostics.Debug.WriteLine("ToggleFlyout command fired");
-            IsFlyoutVisible = !IsFlyoutVisible;
+            _ = LoadRoutesAsync();
         }
         partial void OnIsFlyoutVisibleChanged(bool value)
         {
@@ -70,119 +113,104 @@ namespace MauiDemo2.ViewModel
                 System.Diagnostics.Debug.WriteLine("CurrentPage is not CardPage. Actual type: " + currentPage?.GetType().ToString());
             }
         }
-
-        private async Task GetRoutes()
-        {
-            IsBusy = true;
-            var testRoutes = GenerateTestRoutes();
-
-            Routes.Clear();
-            foreach (var route in testRoutes)
-            {
-                Routes.Add(route);
-            }
-            //await RouteServiceClient<ObservableCollection<TripResponseDto>>.Get("routes", RoutesDataLoaded, RoutesDataLoadFailed);
-            IsBusy = false;
-        }
-        private void RoutesDataLoaded(ObservableCollection<TripResponseDto> dtoList)
-        {
-            Routes.Clear();
-
-            foreach (var dto in dtoList)
-            {
-                var route = _mapper.Map<RouteMainPage>(dto);
-                Routes.Add(route);
-            }
-
-            Message = "Маршруты загружены";
-        }
-
-        private void RoutesDataLoadFailed(Exception exception)
-        {
-            Console.WriteLine(exception?.Message);
-        }
-
-        private List<RouteMainPage> GenerateTestRoutes()
-        {
-            return new List<RouteMainPage>
-            {
-                new RouteMainPage
-                {
-                    Id = 1,
-                    Name = "Горный маршрут",
-                    Description = lorem,
-                    TimesCompleted = 42,
-                    Rating = 4.8,
-                    Distance = 12.5,
-                    DaysAgo = "2 дня назад",
-                    IsFavorite = true
-                },
-                new RouteMainPage
-                {
-                    Id = 2,
-                    Name = "Лесная тропа",
-                    Description = lorem,
-                    TimesCompleted = 28,
-                    Rating = 4.5,
-                    Distance = 8.2,
-                    DaysAgo = "5 дней назад",
-                    IsFavorite = false
-                },
-                new RouteMainPage
-                {
-                    Id = 3,
-                    Name = "Озерный круг",
-                    Description = lorem,
-                    TimesCompleted = 35,
-                    Rating = 4.7,
-                    Distance = 10.0,
-                    DaysAgo = "1 день назад",
-                    IsFavorite = true
-                },
-                new RouteMainPage
-                {
-                    Id = 4,
-                    Name = "Городской тур",
-                    Description = lorem,
-                    TimesCompleted = 19,
-                    Rating = 4.3,
-                    Distance = 6.5,
-                    DaysAgo = "3 дня назад",
-                    IsFavorite = false
-                },
-                new RouteMainPage
-                {
-                    Id = 5,
-                    Name = "Речная прогулка",
-                    Description = lorem,
-                    TimesCompleted = 31,
-                    Rating = 4.6,
-                    Distance = 9.3,
-                    DaysAgo = "1 неделю назад",
-                    IsFavorite = true
-                }
-            };
-        }
-
-        private void ToggleFavorite(RouteMainPage route)
+        private async void OpenRouteFollowingPage(RouteCardResponseDto route)
         {
             if (route != null)
             {
-                route.IsFavorite = !route.IsFavorite;
-                // Здесь можно добавить вызов API для обновления избранного на сервере
-                Console.WriteLine($"Route {route.Name} favorite status changed to {route.IsFavorite}");
+                await Shell.Current.GoToAsync($"FollowingPage?RouteId={route.RouteInfo.RouteId}");
             }
         }
-        private async void OpenProfile() => await Shell.Current.GoToAsync(nameof(ProfilePage));
+        
+        [RelayCommand]
+        private async Task OpenRouteFromCard(RouteCardResponseDto route)
+        {
+            await Shell.Current.GoToAsync($"{nameof(RouteDetailsPage)}?RouteId={route.RouteInfo.RouteId}");
+        }
 
-        private void OpenUserPage() => Console.WriteLine("Открываем страницу пользователя");
+        private void ToggleFlyout()
+        {
+            System.Diagnostics.Debug.WriteLine("ToggleFlyout command fired");
+            IsFlyoutVisible = !IsFlyoutVisible;
+        }
+        private async Task LoadRoutesAsync()
+        {
+            IsBusy = true;
+            var routes = await _routeService.GetRoutesAsync();
 
-        private void OpenSettings() => Console.WriteLine("Открываем настройки");
+            Routes.Clear();
+            foreach (var route in routes)
+            {
+                Routes.Add(route);
+            }
+            FilteredRoutes = new ObservableCollection<RouteCardResponseDto>(Routes);
+            IsBusy = false;
+        }
 
-        private void OpenNotifications() => Console.WriteLine("Открываем уведомления");
+        private void OnRouteUpdated(int routeId, UserLike? userLike)
+        {
+            System.Diagnostics.Debug.WriteLine($"[CardViewModel] OnRouteUpdated: RouteId={routeId}, UserLike={(userLike != null ? userLike.IsUserFavorite.ToString() : "null")}");
+            var route = Routes.FirstOrDefault(r => r.RouteInfo.RouteId == routeId);
+            if (route != null)
+            {
+                route.RouteInfo.UserLike = userLike;
+                OnPropertyChanged(nameof(Routes));
+                System.Diagnostics.Debug.WriteLine($"[CardViewModel] OnRouteUpdated: Route {route.RouteInfo.RouteTitle}, UserLike={(userLike != null ? userLike.IsUserFavorite.ToString() : "null")}");
+            }
+        }
 
-        private void OpenRouteFollow() => Console.WriteLine("Открываем уведомления");
+        public async void UpdateFavorite(RouteCardResponseDto route)
+        {
+            if (route != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CardViewModel] UpdateFavorite: BEFORE call, RouteId={route.RouteInfo.RouteId}, UserLike={(route.RouteInfo.UserLike != null ? route.RouteInfo.UserLike.IsUserFavorite.ToString() : "null")}");
+                await _routeService.Update(route.RouteInfo.RouteId);
+                System.Diagnostics.Debug.WriteLine($"[CardViewModel] UpdateFavorite: AFTER call, RouteId={route.RouteInfo.RouteId}, UserLike={(route.RouteInfo.UserLike != null ? route.RouteInfo.UserLike.IsUserFavorite.ToString() : "null")}");
+                Routes = new ObservableCollection<RouteCardResponseDto>(Routes);
+            }
+        }
 
-        private void OpenRouteDetails(RouteMainPage route) => Console.WriteLine($"Открываем страницу маршрута {route.Name}");
+        private void OpenRouteDetails(RouteCardResponseDto route) => System.Diagnostics.Debug.WriteLine($"Открываем детали маршрута {route.RouteInfo.RouteTitle}");
+
+        private async void StartRoute()
+        {
+            await Shell.Current.GoToAsync(nameof(FollowingPage));
+        }
+
+        private void FilterRoutes()
+        {
+            if (string.IsNullOrWhiteSpace(SearchText))
+            {
+                FilteredRoutes = new ObservableCollection<RouteCardResponseDto>(Routes);
+            }
+            else
+            {
+                var filtered = Routes.Where(r => r.RouteInfo.RouteTitle != null && r.RouteInfo.RouteTitle.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+                FilteredRoutes = new ObservableCollection<RouteCardResponseDto>(filtered);
+            }
+        }
+
+        private void OpenProfile()
+        {
+            Shell.Current.GoToAsync(nameof(ProfilePage));
+        }
+
+        private void OpenUserPage()
+        {
+
+        }
+
+        private void OpenSettings()
+        {
+
+        }
+
+        private void OpenRouteFollow()
+        {
+ 
+        }
+
+        private void OpenNotifications()
+        {
+        }
     }
-}   
+}

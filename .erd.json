@@ -1,0 +1,77 @@
+{
+  "entities": [
+    {
+      "name": "User",
+      "attributes": [
+        { "name": "Id", "type": "int", "isPrimaryKey": true },
+        { "name": "Username", "type": "string" },
+        { "name": "Email", "type": "string" }
+      ]
+    },
+    {
+      "name": "RouteMainPage",
+      "attributes": [
+        { "name": "Id", "type": "int", "isPrimaryKey": true },
+        { "name": "Name", "type": "string" },
+        { "name": "Description", "type": "string" },
+        { "name": "TimesCompleted", "type": "int" },
+        { "name": "Rating", "type": "float" },
+        { "name": "IsSaved", "type": "bool" },
+        { "name": "IsFinished", "type": "bool" }
+      ]
+    },
+    {
+      "name": "Review",
+      "attributes": [
+        { "name": "Id", "type": "int", "isPrimaryKey": true },
+        { "name": "UserId", "type": "int" },
+        { "name": "Text", "type": "string" },
+        { "name": "Rating", "type": "int" }
+      ]
+    },
+    {
+      "name": "Place",
+      "attributes": [
+        { "name": "Id", "type": "int", "isPrimaryKey": true },
+        { "name": "Name", "type": "string" },
+        { "name": "Description", "type": "string" }
+      ]
+    },
+    {
+      "name": "AdditionalPlace",
+      "attributes": [
+        { "name": "Id", "type": "int", "isPrimaryKey": true },
+        { "name": "Name", "type": "string" },
+        { "name": "Type", "type": "AdditionalPlaceType" }
+      ]
+    },
+    {
+      "name": "Point",
+      "attributes": [
+        { "name": "X", "type": "double" },
+        { "name": "Y", "type": "double" }
+      ]
+    },
+    {
+      "name": "Subscription",
+      "attributes": [
+        { "name": "Id", "type": "int", "isPrimaryKey": true },
+        { "name": "UserId", "type": "int" },
+        { "name": "RouteId", "type": "int" }
+      ]
+    },
+    {
+      "name": "WeatherCurrent",
+      "attributes": [
+        { "name": "Temperature", "type": "double" },
+        { "name": "Condition", "type": "string" }
+      ]
+    }
+  ],
+  "relationships": [
+    { "from": "User", "to": "Review", "type": "one-to-many", "label": "writes" },
+    { "from": "User", "to": "Subscription", "type": "one-to-many", "label": "subscribes" },
+    { "from": "RouteMainPage", "to": "Review", "type": "one-to-many", "label": "has" },
+    { "from": "RouteMainPage", "to": "Point", "type": "one-to-many", "label": "contains" }
+  ]
+}
