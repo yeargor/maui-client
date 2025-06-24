@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiDemo2.Views.RegisterPage"
+             xmlns:vm="clr-namespace:MauiDemo2.ViewModels"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+    <ContentPage.BindingContext>
+        <vm:RegisterPageViewModel />
+    </ContentPage.BindingContext>
+    <Grid RowDefinitions="*,Auto" BackgroundColor="#FFFCF0">
+        <Grid>
+            <Image Source="loginb.png"
+                Aspect="AspectFill"
+                HorizontalOptions="FillAndExpand"
+                VerticalOptions="FillAndExpand"/>
+            <Grid VerticalOptions="Center"
+                RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                RowSpacing="5"
+                Margin="40,20,40,0">
+                <Label Text="Регистрация"
+                    Grid.Row="0"
+                    FontSize="24"
+                    Margin="0,0,0,20"
+                    FontAttributes="Bold"
+                    HorizontalTextAlignment="Center"
+                    TextColor="#3C2222"/>
+
+                <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="15">
+                    <StackLayout Grid.Column="0">
+                        <StackLayout Orientation="Horizontal" Margin="0,0,0,5">
+                            <Label Text="Имя" FontSize="14" TextColor="Black"/>
+                        </StackLayout>
+                        <Border StrokeShape="RoundRectangle 20" Padding="0" StrokeThickness="0" HorizontalOptions="FillAndExpand" BackgroundColor="White">
+                            <Grid>
+                                <Entry Text="{Binding Request.FirstName, Mode=TwoWay}" FontSize="14" VerticalOptions="Center" Margin="10,0,10,0" BackgroundColor="Transparent" TextColor="Black" HeightRequest="40"/>
+                            </Grid>
+                            <Border.Shadow>
+                                <Shadow Brush="#343330" Opacity="0.4" Offset="0,4" Radius="8" />
+                            </Border.Shadow>
+                        </Border>
+                    </StackLayout>
+                    <StackLayout Grid.Column="1">
+                        <StackLayout Orientation="Horizontal" Margin="0,0,0,5">
+                            <Label Text="Фамилия" FontSize="14" TextColor="Black"/>
+                        </StackLayout>
+                        <Border StrokeShape="RoundRectangle 20" Padding="0" StrokeThickness="0" HorizontalOptions="FillAndExpand" BackgroundColor="White">
+                            <Grid>
+                                <Entry Text="{Binding Request.LastName, Mode=TwoWay}" FontSize="14" VerticalOptions="Center" Margin="10,0,10,0" BackgroundColor="Transparent" TextColor="Black" HeightRequest="40"/>
+                            </Grid>
+                            <Border.Shadow>
+                                <Shadow Brush="#343330" Opacity="0.4" Offset="0,4" Radius="8" />
+                            </Border.Shadow>
+                        </Border>
+                    </StackLayout>
+                </Grid>
+
+                <Grid Grid.Row="2" RowDefinitions="Auto,Auto">
+                    <StackLayout Orientation="Horizontal" Margin="0,0,0,5">
+                        <Label Text="Логин" FontSize="14" TextColor="Black"/>
+                        <Label Text="*" FontSize="14" TextColor="Red"/>
+                    </StackLayout>
+                    <Border StrokeShape="RoundRectangle 20" Padding="0" Grid.Row="1" StrokeThickness="0" HorizontalOptions="FillAndExpand" BackgroundColor="White">
+                        <Grid>
+                            <Entry Text="{Binding Request.Username, Mode=TwoWay}" FontSize="14" VerticalOptions="Center" Margin="10,0,10,0" BackgroundColor="Transparent" TextColor="Black" HeightRequest="40"/>
+                        </Grid>
+                        <Border.Shadow>
+                            <Shadow Brush="#343330" Opacity="0.4" Offset="0,4" Radius="8" />
+                        </Border.Shadow>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="3" RowDefinitions="Auto,Auto">
+                    <Label Text="Отчество" FontSize="14" TextColor="Black" Margin="0,0,0,5"/>
+                    <Border StrokeShape="RoundRectangle 20" Padding="0" Grid.Row="1" StrokeThickness="0" HorizontalOptions="FillAndExpand" BackgroundColor="White">
+                        <Grid>
+                            <Entry Text="{Binding Request.SecondName, Mode=TwoWay}" FontSize="14" VerticalOptions="Center" Margin="10,0,10,0" BackgroundColor="Transparent" TextColor="Black" HeightRequest="40"/>
+                        </Grid>
+                        <Border.Shadow>
+                            <Shadow Brush="#343330" Opacity="0.4" Offset="0,4" Radius="8" />
+                        </Border.Shadow>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="4" RowDefinitions="Auto,Auto">
+                    <StackLayout Orientation="Horizontal" Margin="0,0,0,5">
+                        <Label Text="Email" FontSize="14" TextColor="Black"/>
+                        <Label Text="*" FontSize="14" TextColor="Red"/>
+                    </StackLayout>
+                    <Border StrokeShape="RoundRectangle 20" Padding="0" Grid.Row="1" StrokeThickness="0" HorizontalOptions="FillAndExpand" BackgroundColor="White">
+                        <Grid>
+                            <Entry Text="{Binding Request.Email, Mode=TwoWay}" FontSize="14" VerticalOptions="Center" Margin="10,0,10,0" BackgroundColor="Transparent" TextColor="Black" HeightRequest="40"/>
+                        </Grid>
+                        <Border.Shadow>
+                            <Shadow Brush="#343330" Opacity="0.4" Offset="0,4" Radius="8" />
+                        </Border.Shadow>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="5" RowDefinitions="Auto,Auto">
+                    <StackLayout Orientation="Horizontal" Margin="0,0,0,5">
+                        <Label Text="Пароль" FontSize="14" TextColor="Black"/>
+                        <Label Text="*" FontSize="14" TextColor="Red"/>
+                    </StackLayout>
+                    <Border StrokeShape="RoundRectangle 20" Padding="0" Grid.Row="1" StrokeThickness="0" HorizontalOptions="FillAndExpand" BackgroundColor="White">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Entry x:Name="PasswordEntry"
+                                Grid.Column="0"
+                                Text="{Binding Request.Password, Mode=TwoWay}"
+                                IsPassword="{Binding IsPassword}"
+                                FontSize="14"
+                                VerticalOptions="Center"
+                                TextColor="Black"
+                                Margin="10,0,10,0"
+                                BackgroundColor="Transparent" HeightRequest="40"/>
+                            <Image Grid.Column="1"
+                                Source="{Binding EyeIcon}"
+                                Margin="0,0,10,0"
+                                WidthRequest="28" HeightRequest="28"
+                                VerticalOptions="Center" HorizontalOptions="Center">
+                                <Image.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding TogglePasswordVisibilityCommand}" />
+                                </Image.GestureRecognizers>
+                            </Image>
+                        </Grid>
+                        <Border.Shadow>
+                            <Shadow Brush="#343330" Opacity="0.4" Offset="0,4" Radius="8" />
+                        </Border.Shadow>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="6" RowDefinitions="Auto,Auto">
+                    <StackLayout Orientation="Horizontal" Margin="0,0,0,5">
+                        <Label Text="Повторите пароль" FontSize="14" TextColor="Black"/>
+                        <Label Text="*" FontSize="14" TextColor="Red"/>
+                    </StackLayout>
+                    <Border StrokeShape="RoundRectangle 20" Padding="0" Grid.Row="1" StrokeThickness="0" HorizontalOptions="FillAndExpand" BackgroundColor="White">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Entry x:Name="RepeatPasswordEntry"
+                                Grid.Column="0"
+                                Text="{Binding RepeatPassword, Mode=TwoWay}"
+                                IsPassword="{Binding IsRepeatPassword}"
+                                FontSize="14"
+                                TextColor="Black"
+                                VerticalOptions="Center"
+                                Margin="10,0,10,0"
+                                BackgroundColor="Transparent" HeightRequest="40"/>
+                            <Image Grid.Column="1"
+                                Source="{Binding RepeatEyeIcon}"
+                                Margin="0,0,10,0"
+                                WidthRequest="28" HeightRequest="28"
+                                VerticalOptions="Center" HorizontalOptions="Center">
+                                <Image.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleRepeatPasswordVisibilityCommand}" />
+                                </Image.GestureRecognizers>
+                            </Image>
+                        </Grid>
+                        <Border.Shadow>
+                            <Shadow Brush="#343330" Opacity="0.4" Offset="0,4" Radius="8" />
+                        </Border.Shadow>
+                    </Border>
+                </Grid>
+
+                <Label Grid.Row="7"
+                    Text="Пароли не совпадают"
+                    TextColor="Red"
+                    FontSize="13"
+                    IsVisible="{Binding IsPasswordMismatch}"/>
+
+                <Label Grid.Row="8" HorizontalOptions="End" Margin="0,10,0,10">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Уже есть аккаунт? " TextColor="#3C2222" FontSize="14"/>
+                            <Span Text="Войти"
+                                TextColor="#F17256"
+                                FontSize="14"
+                                TextDecorations="Underline">
+                                <Span.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToLoginPageCommand}"/>
+                                </Span.GestureRecognizers>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </Grid>
+        </Grid>
+        <Button  Text="Зарегистрироваться"
+                    Grid.Row="1"
+                        Margin="0,15,0,20"
+                        Padding="46,10,46,10"
+                        CornerRadius="26"
+                        FontSize="18"
+                        BackgroundColor="#F17256"
+                        TextColor="White"
+                        HorizontalOptions="Center"
+                        VerticalOptions="End"
+                        Command="{Binding RegisterCommand}"/>
+
+        <Grid IsVisible="{Binding IsErrorPopupVisible}" BackgroundColor="#80000000" RowSpan="2" ColumnSpan="2" ZIndex="100">
+            <Border BackgroundColor="White" Padding="20" StrokeShape="RoundRectangle 20" Margin="20" HorizontalOptions="Center" VerticalOptions="Center">
+                <Grid>
+                    <Grid RowDefinitions="*,Auto" RowSpacing="20">
+                    <Label Grid.Row="0" Text="Ошибки при заполнении формы:" FontAttributes="Bold" FontSize="16" TextColor="Black" Margin="0,0,0,10"/>
+                    <ScrollView Grid.Row="1">
+                        <Label Text="{Binding ErrorPopupText}" TextColor="Black" FontSize="14" />
+                    </ScrollView>
+                </Grid>
+                </Grid>
+            </Border>
+             <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CloseErrorPopupCommand}" />
+            </Grid.GestureRecognizers>
+        </Grid>
+    </Grid>
+</ContentPage>

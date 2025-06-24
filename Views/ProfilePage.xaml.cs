@@ -4,9 +4,9 @@ namespace MauiDemo2.Views;
 
 public partial class ProfilePage : ContentPage
 {
-	public ProfilePage(ProfilePageViewModel viewModel)
-	{
-		InitializeComponent();
-		BindingContext = viewModel;
-	}
+    public ProfilePage(ProfilePageViewModel viewModel)
+    {
+        InitializeComponent();
+        BindingContext = viewModel;
+    }
 }

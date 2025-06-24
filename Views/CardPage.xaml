@@ -1,146 +1,315 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:viewmodels="clr-namespace:MauiDemo2.ViewModel"
-             xmlns:dto="clr-namespace:MauiDemo2.Dtos"
+             xmlns:viewmodels="clr-namespace:MauiDemo2.ViewModels"
+             xmlns:models="clr-namespace:MauiDemo2.Models.Route"
+             xmlns:converters="clr-namespace:MauiDemo2.Converters"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="MauiDemo2.Views.CardPage"
-             Title="Cards Page">
+             x:DataType="viewmodels:CardViewModel"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="True"
+             BackgroundColor="#FFFCF1">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:RatingToStarsConverter x:Key="RatingToStarsConverter"/>
+            <converters:FavoriteToHeartConverter x:Key="FavoriteToHeartConverter"/>
+            <converters:DateToDaysAgoConverter x:Key="DateToDaysAgoConverter"/>
+            <Style TargetType="Label">
+                <Setter Property="FontFamily" Value="Inter-Regular" />
+            </Style>
 
-    <ContentPage.BindingContext>
-        <viewmodels:CardViewModel />
-    </ContentPage.BindingContext>
+            <Style TargetType="Button">
+                <Setter Property="FontFamily" Value="Inter-Regular" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
-    <ScrollView>
-        <Grid RowDefinitions="Auto,*,Auto">
-            <Label Grid.Row="0"
-                   Text="Маршруты"
-                   FontAttributes="Bold"
-                   FontSize="30"
-                   HorizontalOptions="Center"
-                   TextColor="Black"
-                   VerticalOptions="End" />
-
-            <CollectionView Grid.Row="1"
-                            ItemsSource="{Binding Routes}"
+    <Grid>
+        <ScrollView Padding="15">
+            <VerticalStackLayout Spacing="10">
+                <Grid ColumnDefinitions="*, Auto"
+                      ColumnSpacing ="20"
+                      HeightRequest="38"
+                      Margin="20,0,20,20">
+                    <Border StrokeShape="RoundRectangle 10"
+                            StrokeThickness="0"
+                            HorizontalOptions="FillAndExpand"
                             BackgroundColor="White"
-                            SelectionMode="None">
-                <CollectionView.ItemsLayout>
-                    <GridItemsLayout Orientation="Vertical"/>
-                </CollectionView.ItemsLayout>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="dto:RouteDto">
-                        <StackLayout>
-                            <Frame Margin="10"
-                                   BorderColor="OrangeRed"
-                                   CornerRadius="15"
-                                   HasShadow="True"
-                                   HeightRequest="320"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="CenterAndExpand">
-                                <Frame.Shadow>
-                                    <Shadow Brush="Black"
-                                            Opacity="0.8"
-                                            Offset="6,10" />
-                                </Frame.Shadow>
-                                <StackLayout>
-                                    <Label FontAttributes="Bold"
-                                           FontSize="Large"
-                                           HorizontalOptions="Center"
-                                           Text="{Binding Name}"
-                                           VerticalOptions="Center" />
-
-                                    <Label Text="{Binding Distance, StringFormat='Дистанция: {0} км'}"
-                                           FontSize="12"
+                            Grid.Column="0">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <Image Source="glass.svg"
+                                   HeightRequest="22"
+                                   WidthRequest="22"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Start"
+                                   Margin="10"/>
+                            <Entry Grid.Column="1"
+                                   Placeholder="Поиск маршрута..."
+                                   Text="{Binding SearchText, Mode=TwoWay}"
+                                   BackgroundColor="Transparent"
+                                   TextColor="Black"
+                                   FontSize="14"
+                                   VerticalOptions="Center"
+                                   Margin="0,0,10,0"/>
+                        </Grid>
+                        <Border.Shadow>
+                            <Shadow Brush="#343330" 
+                                    Opacity="0.4" 
+                                    Offset="0,4" 
+                                    Radius="6" />
+                        </Border.Shadow>
+                    </Border>
+                    <Border StrokeShape="RoundRectangle 10"
+                            StrokeThickness="0"
+                            WidthRequest="38"
+                            HorizontalOptions="End"
+                            BackgroundColor="White"
+                            Grid.Column="1">
+                        <Image Source="sliders.svg"
+                               HeightRequest="26"
+                               WidthRequest="26"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Center"
+                               Margin="10"/>
+                        <Border.Shadow>
+                            <Shadow Brush="#343330" 
+                                    Opacity="0.4" 
+                                    Offset="0,4" 
+                                    Radius="6" />
+                        </Border.Shadow>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ToggleFlyoutCommand}" />
+                        </Border.GestureRecognizers>
+                    </Border>
+                </Grid>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding FilteredRoutes}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:RouteCardResponseDto">
+                            <VerticalStackLayout>
+                                <Grid  ColumnDefinitions="*, Auto"
+                                       ColumnSpacing="20"
+                                       Margin="20,0,0,10">
+                                    <HorizontalStackLayout Spacing="10">
+                                        <Border StrokeShape="Ellipse"
+                                                StrokeThickness="0"
+                                                BackgroundColor="White"
+                                                HeightRequest="45"
+                                                WidthRequest="45"
+                                                HorizontalOptions="Start"
+                                                VerticalOptions="Center">
+                                            <Image Source="{Binding UserInfo.ImageUrl}"
+                                                   HorizontalOptions="Fill"
+                                                   VerticalOptions="Fill"
+                                                   Aspect="AspectFill"/>
+                                            <Border.Shadow>
+                                                <Shadow Brush="#343330"
+                                                        Opacity="0.4"
+                                                        Offset="0,4"
+                                                        Radius="6" />
+                                            </Border.Shadow>
+                                        </Border>
+                                        <Label Text="{Binding UserInfo.Username}"
+                                               FontSize="14"
+                                               TextColor="Black"
+                                               VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                    <Label Text="{Binding RouteInfo.CreatedAt, Converter={StaticResource DateToDaysAgoConverter}}"
+                                           FontSize="13"
                                            TextColor="Black"
-                                           HorizontalOptions="Center" />
-
-                                    <Label Text="{Binding TimesCompleted, StringFormat='Пройдено: {0} раз'}"
-                                           FontSize="12"
-                                           TextColor="Black"
-                                           HorizontalOptions="Center" />
-
-                                    <Label Text="{Binding Rating, StringFormat='Рейтинг: {0}★'}"
-                                           FontSize="12"
-                                           TextColor="Gold"
-                                           HorizontalOptions="Center" />
-
-                                    <Label FontAttributes="Italic"
-                                           HorizontalOptions="Center"
-                                           HorizontalTextAlignment="Center"
-                                           LineBreakMode="WordWrap"
-                                           MaxLines="3"
-                                           Text="{Binding Description}" />
-
-                                    <Button Text="Пройти"
-                                            BackgroundColor="#F17255"
-                                            TextColor="White"
-                                            WidthRequest="120"
-                                            HeightRequest="40"
-                                            HorizontalOptions="Center" />
-                                </StackLayout>
-                            </Frame>
-                        </StackLayout>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-
-            <Grid Grid.Row="2"
-                  BackgroundColor="#EEE"
-                  HeightRequest="50"
-                  VerticalOptions="End"
-                  Padding="10"
-                  RowSpacing="0"
-                  ColumnSpacing="20">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <Image Source="home.png"
-                       Grid.Column="0"
-                       HeightRequest="30"
-                       WidthRequest="30"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Center">
-                    <Image.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding OpenNotificationsCommand}" />
-                    </Image.GestureRecognizers>
-                </Image>
-
-                <Image Source="search.png"
-                       Grid.Column="1"
-                       HeightRequest="30"
-                       WidthRequest="30"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Center">
-                    <Image.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding OpenRouteDetailsCommand}" />
-                    </Image.GestureRecognizers>
-                </Image>
-
-                <Image Source="map.png"
-                       Grid.Column="2"
-                       HeightRequest="30"
-                       WidthRequest="30"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Center">
-                    <Image.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding OpenRouteFollowCommand}" />
-                    </Image.GestureRecognizers>
-                </Image>
-
-                <Image Source="user.png"
-                       Grid.Column="3"
-                       HeightRequest="30"
-                       WidthRequest="30"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Center">
-                    <Image.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding OpenProfileCommand}" />
-                    </Image.GestureRecognizers>
-                </Image>
-            </Grid>
+                                           VerticalOptions="End"
+                                           HorizontalOptions="End"/>
+                                </Grid>
+                                <Border StrokeShape="RoundRectangle 25"
+                                            StrokeThickness="0"
+                                            BackgroundColor="#F9D6B8"
+                                            Padding="0"
+                                            Margin="20, 0, 20 , 30">
+                                    <Border.Shadow>
+                                        <Shadow Brush="#343330" 
+                                                    Opacity="0.4" 
+                                                    Offset="0,4" 
+                                                    Radius="6" />
+                                    </Border.Shadow>
+                                    <Grid RowDefinitions="200, Auto, Auto, Auto"
+                                                RowSpacing="5"
+                                                HorizontalOptions="FillAndExpand">
+                                        <CarouselView ItemsSource="{Binding RouteInfo.ImagesUrls}"
+                                                            Grid.Row="0">
+                                            <CarouselView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border StrokeThickness="0"
+                                                                Padding="0">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="0,0,25,25"/>
+                                                        </Border.StrokeShape>
+                                                        <Image Source="{Binding .}"
+                                                                   Aspect="AspectFill"
+                                                                   HorizontalOptions="FillAndExpand"
+                                                                   VerticalOptions="FillAndExpand"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </CarouselView.ItemTemplate>
+                                        </CarouselView>
+                                        <Label Grid.Row="0"
+                                                   Grid.Column="0"
+                                                   Text="{Binding RouteInfo.RouteTitle}"
+                                                   FontSize="16"
+                                                   TextColor="Black"
+                                                   VerticalOptions="Start"
+                                                   HorizontalOptions="Start"
+                                                   Margin="20,15,0,0"/>
+                                        <Image Grid.Row="0"
+                                               Grid.Column="1"
+                                               Source="{Binding RouteInfo.UserLike, Converter={StaticResource FavoriteToHeartConverter}}"
+                                               WidthRequest="30"
+                                               HeightRequest="30"
+                                               VerticalOptions="Start"
+                                               HorizontalOptions="End"
+                                               Margin="0,15,20,0">
+                                            <Image.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CardViewModel}}, Path=UpdateFavoriteCommand}" CommandParameter="{Binding .}" />
+                                            </Image.GestureRecognizers>
+                                        </Image>
+                                        <VerticalStackLayout Grid.Row="0"
+                                                                 Grid.Column="0"
+                                                                 VerticalOptions="End"
+                                                                 HorizontalOptions="Start"
+                                                                 Margin="20,0,0,20"
+                                                                 Spacing="2">
+                                            <HorizontalStackLayout Spacing="5">
+                                                <Image Source="trip.svg"
+                                                           HeightRequest="23"
+                                                           WidthRequest="23"
+                                                           VerticalOptions="Center">
+                                                    <Image.Behaviors>
+                                                        <toolkit:IconTintColorBehavior TintColor="#343330" />
+                                                    </Image.Behaviors>
+                                                </Image>
+                                                <Label Text="{Binding RouteInfo.RouteDistance, StringFormat='{}{0} km'}"
+                                                           FontSize="15"
+                                                           TextColor="Black"
+                                                           VerticalOptions="Center"/>
+                                            </HorizontalStackLayout>
+                                            <HorizontalStackLayout Spacing="5">
+                                                <Image Source="run.svg"
+                                                           HeightRequest="17"
+                                                           VerticalOptions="Center"/>
+                                                <Label Text="{Binding UserCount}"  
+                                                           FontSize="11"
+                                                           TextColor="Black"
+                                                           VerticalOptions="Center"/>
+                                            </HorizontalStackLayout>
+                                            <HorizontalStackLayout Spacing="5">
+                                                <HorizontalStackLayout Spacing="5" HorizontalOptions="Start" BindableLayout.ItemsSource="{Binding RouteInfo.RouteRating, Converter={StaticResource RatingToStarsConverter}}">
+                                                    <BindableLayout.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Image Source="{Binding .}" WidthRequest="14" HeightRequest="15" />
+                                                        </DataTemplate>
+                                                    </BindableLayout.ItemTemplate>
+                                                </HorizontalStackLayout>
+                                                <Label Text="{Binding RouteInfo.RouteRating}"
+                                                            FontSize="12"
+                                                            TextColor="Black"
+                                                            VerticalOptions="Center" />
+                                            </HorizontalStackLayout>
+                                        </VerticalStackLayout>
+                                        <IndicatorView Grid.Row="1"
+                                                           x:Name="TextIndicator"
+                                                           IndicatorColor="#FDA895"
+                                                           SelectedIndicatorColor="#F17256"
+                                                           HorizontalOptions="Center"
+                                                           IndicatorSize="7"/>
+                                        <CarouselView Grid.Row="2"
+                                                          ItemsSource="{Binding RouteInfo.DescriptionParts}"
+                                                          HorizontalOptions="FillAndExpand"
+                                                          IsBounceEnabled="False"
+                                                          PeekAreaInsets="0"
+                                                          Margin="15,0,15,10"
+                                                          Loop="False"
+                                                          IndicatorView="{x:Reference TextIndicator}">
+                                            <CarouselView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Label Text="{Binding .}"
+                                                                 FontSize="10"
+                                                                 HorizontalOptions="FillAndExpand"
+                                                                 VerticalOptions="FillAndExpand"
+                                                                 TextColor="Black"
+                                                                 LineBreakMode="WordWrap"/>
+                                                </DataTemplate>
+                                            </CarouselView.ItemTemplate>
+                                        </CarouselView>
+                                        <Button Text="Пройти маршрут"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CardViewModel}}, Path=OpenRouteFollowingCommand}"
+                                                CommandParameter="{Binding .}"
+                                                BackgroundColor="#FDA895"
+                                                TextColor="White"
+                                                WidthRequest="100"
+                                                HeightRequest="37"
+                                                HorizontalOptions="End"
+                                                CornerRadius="15"
+                                                VerticalOptions="End"
+                                                Margin="15"/>
+                                    </Grid>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer 
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:CardViewModel}}, Path=OpenRouteFromCardCommand}" 
+                                                CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+                                </Border>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+        <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#F17256" HeightRequest="60" VerticalOptions="Center" HorizontalOptions="Center"/>
+        <BoxView x:Name="DimOverlay"
+                 Color="Black"
+                 Opacity="0.5"
+                 IsVisible="{Binding IsFlyoutVisible}"
+                 HorizontalOptions="FillAndExpand"
+                 VerticalOptions="FillAndExpand"
+                 InputTransparent="False">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ToggleFlyoutCommand}" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
+        <Grid x:Name="FlyoutMenu"
+              BackgroundColor="White"
+              WidthRequest="250"
+              Padding="10"
+              TranslationX="300"
+              HorizontalOptions="End"
+              VerticalOptions="FillAndExpand">
+            <VerticalStackLayout Spacing="15">
+                <Label Text="Настройки"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="Black"/>
+                <Border StrokeShape="RoundRectangle 10"
+                         StrokeThickness="0"
+                         WidthRequest="38"
+                         HorizontalOptions="End"
+                         BackgroundColor="White"
+                         Grid.Column="1">
+                    <Image Source="sliders.svg"
+                            HeightRequest="26"
+                            WidthRequest="26"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                            Margin="10"/>
+                    <Border.Shadow>
+                        <Shadow Brush="#343330" 
+                                 Opacity="0.4" 
+                                 Offset="0,4" 
+                                 Radius="6" />
+                    </Border.Shadow>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleFlyoutCommand}" />
+                    </Border.GestureRecognizers>
+                </Border>
+            </VerticalStackLayout>
         </Grid>
-    </ScrollView>
+    </Grid>
 </ContentPage>

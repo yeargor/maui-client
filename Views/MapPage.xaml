@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
+             x:Class="MauiDemo2.Views.MapPage"
+             xmlns:vm="clr-namespace:MauiDemo2.ViewModels"
+             x:DataType="vm:MapRouteViewModel"
+             BackgroundColor="White"
+             Shell.NavBarIsVisible="False">
+
+    <AbsoluteLayout x:Name="absoluteLayout">
+        <maps:Map x:Name="map"
+                  AbsoluteLayout.LayoutBounds="0,0,1,1"
+                  AbsoluteLayout.LayoutFlags="All"
+                  MapType="Street"
+                  IsShowingUser="True">
+        </maps:Map>
+
+        <Grid ColumnDefinitions="Auto, *"
+              Margin="20">
+            <Label Text="Name"
+                   FontSize="16"
+                   TextColor="Black"
+                   Grid.Column="1"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Start" />
+        </Grid>
+
+        <ContentView x:Name="tapOverlay"
+                     AbsoluteLayout.LayoutBounds="0,0,1,1"
+                     AbsoluteLayout.LayoutFlags="All"
+                     BackgroundColor="Transparent">
+            <ContentView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnMapTapped" />
+            </ContentView.GestureRecognizers>
+        </ContentView>
+
+        <ContentView x:Name="dimOverlay"
+                     AbsoluteLayout.LayoutBounds="0,0,1,1"
+                     AbsoluteLayout.LayoutFlags="All"
+                     BackgroundColor="Black"
+                     Opacity="0"
+                     IsVisible="False">
+            <ContentView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnDimOverlayTapped" />
+            </ContentView.GestureRecognizers>
+        </ContentView>
+
+        <Border x:Name="slidingPanel"
+                AbsoluteLayout.LayoutBounds="0,1,1,0.3"
+                AbsoluteLayout.LayoutFlags="All"
+                BackgroundColor="White"
+                Padding="10"
+                IsVisible="False"
+                TranslationY="500">
+        </Border>
+    </AbsoluteLayout>
+</ContentPage>
