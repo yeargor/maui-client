@@ -29,7 +29,6 @@ namespace MauiDemo2.Platforms.Android
             {
                 System.Diagnostics.Debug.WriteLine($"Pin clicked: {pin.pin.Label}, Coordinates: {pin.pin.Location.Latitude}, {pin.pin.Location.Longitude}");
 
-                // Передача данных в ViewModel
                 WeakReferenceMessenger.Default.Send(new PinClickedMessage(pin.pin.Label, pin.pin.Location));
             }
             else

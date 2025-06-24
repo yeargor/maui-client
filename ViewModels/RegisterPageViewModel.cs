@@ -135,7 +135,6 @@ namespace MauiDemo2.ViewModels
             var results = new List<ValidationResult>();
             bool isValid = Validator.TryValidateObject(req, context, results, true);
 
-            // Пароли
             if (string.IsNullOrWhiteSpace(Request.Password))
                 PasswordErrors.Add("Password cannot be empty");
             if (string.IsNullOrWhiteSpace(RepeatPassword))
@@ -143,7 +142,6 @@ namespace MauiDemo2.ViewModels
             if (!string.IsNullOrWhiteSpace(Request.Password) && !string.IsNullOrWhiteSpace(RepeatPassword) && Request.Password != RepeatPassword)
                 RepeatPasswordErrors.Add("Passwords do not match");
 
-            // DataAnnotations
             foreach (var error in results)
             {
                 foreach (var member in error.MemberNames)
@@ -211,7 +209,6 @@ namespace MauiDemo2.ViewModels
             SelectedPhoto = photo;
             if (photo == "man.png" || photo == "woman.png")
             {
-                // Не трогаем PickedPhotoImageSource и PickedPhotoFile, чтобы третий кружок всегда был myphoto.png
                 PickedPhotoImageSource = null;
                 PickedPhotoFile = null;
             }
@@ -220,21 +217,17 @@ namespace MauiDemo2.ViewModels
         [RelayCommand]
         private async Task PickPhoto()
         {
-            try
+            var result = await FilePicker.PickAsync(new PickOptions
             {
-                var result = await FilePicker.PickAsync(new PickOptions
-                {
-                    PickerTitle = "Выберите фото",
-                    FileTypes = FilePickerFileType.Images
-                });
-                if (result != null)
-                {
-                    PickedPhotoFile = result;
-                    SelectedPhoto = "myphoto.png";
-                    PickedPhotoImageSource = ImageSource.FromStream(() => result.OpenReadAsync().Result);
-                }
+                PickerTitle = "Выберите фото",
+                FileTypes = FilePickerFileType.Images
+            });
+            if (result != null)
+            {
+                PickedPhotoFile = result;
+                SelectedPhoto = "myphoto.png";
+                PickedPhotoImageSource = ImageSource.FromStream(() => result.OpenReadAsync().Result);
             }
-            catch { /* обработка ошибок по желанию */ }
         }
 
         [RelayCommand]
@@ -303,7 +296,7 @@ namespace MauiDemo2.ViewModels
             try
             {
                 Debug.WriteLine("[RegisterAndSendAsync] Sending POST request...");
-                var response = await client.PostAsync("http://10.0.2.2:5246/api/auth/register", content);
+                var response = await client.PostAsync("https://byways-p378.onrender.com/api/auth/register", content);
                 var responseString = await response.Content.ReadAsStringAsync();
                 Debug.WriteLine($"[RegisterAndSendAsync] Response: {response.StatusCode}, Body: {responseString}");
                 if (response.IsSuccessStatusCode)
@@ -368,10 +361,10 @@ namespace MauiDemo2.ViewModels
                     await Application.Current.MainPage.DisplayAlert("Ошибка входа", RegisterError, "OK");
                 return;
             }
-            var result = await _authService.LoginAsync(email, password);
-            var (success, token, error) = result;
-            Debug.WriteLine($"[LoginAfterRegister] Result: success={success}, token={token}, error={error}");
-            if (success && !string.IsNullOrEmpty(token))
+            var result = await _authService.LoginAndSetCurrentUserAsync(email, password);
+            var (success, error) = result;
+            Debug.WriteLine($"[LoginAfterRegister] Result: success={success}, error={error}");
+            if (success)
             {
                 Debug.WriteLine("[LoginAfterRegister] Login success, navigating to CardPage...");
                 if (Application.Current?.MainPage != null)

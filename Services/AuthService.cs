@@ -8,7 +8,7 @@ namespace MauiDemo2.Services
 {
     public class AuthService
     {
-        private readonly string _loginUrl = "http://10.0.2.2:5246/api/auth/login";
+        private readonly string _loginUrl = "https://byways-p378.onrender.com/api/auth/login";
         private readonly UserService _userService;
         private readonly CurrentUserService _currentUserService;
 

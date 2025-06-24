@@ -19,6 +19,8 @@ namespace MauiDemo2.ViewModels
         private readonly IFixture _fixture;
         private readonly RouteService _routeService;
         private readonly PointsAnotherService _pointsService;
+        private readonly ReviewsService _reviewsService;
+        private readonly CurrentUserService _currentUserService;
         
         [ObservableProperty]
         private RoutePostResponseDto? currentRoute;
@@ -44,13 +46,13 @@ namespace MauiDemo2.ViewModels
         private bool _isFullscreenAddReviewVisible;
 
         [ObservableProperty]
-        private string _selectedImage;
+        private string _selectedImage = string.Empty;
 
         [ObservableProperty]
-        private float  _selectedRating = 5f;
+        private string _reviewText = string.Empty;
 
         [ObservableProperty]
-        private string _reviewText;
+        private float _selectedRating = 5f;
 
         [RelayCommand]
         private void Rate(int rating)
@@ -67,33 +69,61 @@ namespace MauiDemo2.ViewModels
                 await Shell.Current.DisplayAlert("Ошибка", "Пожалуйста, введите текст отзыва", "OK");
                 return;
             }
-            var selectedStars = StarList.Count(s => s.StarColor == Brush.Gold);
+            var selectedStars = _starList.Count(s => s.StarColor == Brush.Gold);
             SelectedRating = selectedStars;
-            var newReview = new Review
+
+            var user = _currentUserService.GetCurrentUser();
+            if (user == null || CurrentRoute == null || CurrentRoute.RouteInfo == null)
             {
-                Username = "Wilson Press",
-                UserImageUrl = "user2",
-                ReviewText = ReviewText,
+                await Shell.Current.DisplayAlert("Ошибка", "Не удалось получить пользователя или маршрут", "OK");
+                return;
+            }
+
+            var dto = new CreateReviewRequestDto
+            {
+                UserId = user.UserInfo.UserId,
+                RouteId = CurrentRoute.RouteInfo.RouteId,
+                Text = ReviewText,
                 Grade = SelectedRating
             };
-            CurrentRoute?.Reviews.Add(newReview);
-            ReviewText = string.Empty;
-            SelectedRating = 0;
-            ResetStarRatingBackgroundColor();
-            IsFullscreenAddReviewVisible = false;
-            await Shell.Current.DisplayAlert("Успех", "Ваш отзыв сохранен", "OK");
+
+            var success = await _reviewsService.CreateReviewAsync(dto);
+            if (success)
+            {
+                var newReview = new Review
+                {
+                    UserId = user.UserInfo.UserId,
+                    RouteId = CurrentRoute.RouteInfo.RouteId,
+                    Username = user.UserInfo.Username,
+                    UserImageUrl = user.UserInfo.ImageUrl ?? string.Empty,
+                    ReviewText = ReviewText,
+                    Grade = SelectedRating
+                };
+                CurrentRoute.Reviews.Add(newReview);
+                ReviewText = string.Empty;
+                SelectedRating = 0;
+                ResetStarRatingBackgroundColor();
+                IsFullscreenAddReviewVisible = false;
+                await Shell.Current.DisplayAlert("Успех", "Ваш отзыв сохранен", "OK");
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert("Ошибка", "Не удалось отправить отзыв", "OK");
+            }
         }
 
         public ObservableCollection<LocationPin> LocationPins { get; } = new();
         public ObservableCollection<PlaceInfoResponseDto> PlacesForRoute { get; } = new();
         public ObservableCollection<AdditionalPlaceInfoResponseDto> AdditionalPlacesForRoute { get; } = new();
 
-        public RouteDetailsViewModel(RouteService routeService, PointsAnotherService pointsService, IFixture fixture)
+        public RouteDetailsViewModel(RouteService routeService, PointsAnotherService pointsService, IFixture fixture, ReviewsService reviewsService, CurrentUserService currentUserService)
         {
             _fixture = fixture;
             _routeService = routeService;
             _pointsService = pointsService;
-            SelectedRating = 0f; // Изначально все звезды пустые
+            _reviewsService = reviewsService;
+            _currentUserService = currentUserService;
+            SelectedRating = 0f;
             ResetStarRatingBackgroundColor();
         }
 
@@ -129,8 +159,7 @@ namespace MauiDemo2.ViewModels
         }
         public async Task<RoutePostResponseDto> LoadRouteAsync(int routeId)
         {
-            CurrentRoute = (await _routeService.GetMockRoutePostResponseDto()).FirstOrDefault();
-            // Приводим Reviews к ObservableCollection, чтобы UI реагировал на изменения
+            CurrentRoute = await _routeService.GetRouteById(routeId);
             if (CurrentRoute != null && CurrentRoute.Reviews != null && !(CurrentRoute.Reviews is ObservableCollection<Review>))
             {
                 CurrentRoute.Reviews = new ObservableCollection<Review>(CurrentRoute.Reviews);
@@ -149,8 +178,8 @@ namespace MauiDemo2.ViewModels
                 var newLocation = _fixture.Build<LocationPin>()
                                            .With(x => x.ImageSource, icon)
                                            .With(x => x.Location, new Location(place.LocationInfo.Latitude, place.LocationInfo.Longitude))
-                                           .With(x => x.Description, place.LocationInfo.Description)
-                                           .With(x => x.OrderOfVisit, place.IsCompleted ? (int?)null : place.OrderOfVisit)
+                                        //    .With(x => x.Description, place.LocationInfo.Description)
+                                        //    .With(x => x.OrderOfVisit, place.IsCompleted ? (int?)null : place.OrderOfVisit)
                                            .Create();
                 LocationPins.Add(newLocation);
             }
@@ -161,7 +190,7 @@ namespace MauiDemo2.ViewModels
                 var newLocation = _fixture.Build<LocationPin>()
                                            .With(x => x.ImageSource, ImageSource.FromFile("route_point_additional.svg"))
                                            .With(x => x.Location, new Location(addPlace.LocationInfo.Latitude, addPlace.LocationInfo.Longitude))
-                                           .With(x => x.Description, addPlace.LocationInfo.Description)
+                                        //    .With(x => x.Description, addPlace.LocationInfo.Description)
                                            .With(x => x.OrderOfVisit, (int?)null)
                                            .Create();
                 LocationPins.Add(newLocation);
@@ -169,56 +198,27 @@ namespace MauiDemo2.ViewModels
             return CurrentRoute;
         }
 
-        public async Task<(List<Location> Points, double Distance, double Time)> GetRoutePointsAsync(IEnumerable<PlaceInfoResponseDto> places)
+        public Task<(List<Location> Points, double Distance, double Time)> GetRoutePointsAsync(IEnumerable<PlaceInfoResponseDto> places)
         {
-            string apiKey = "4694ebc07b654d96b095f84d490b17ef";
-            string mode = "walk";
-            var json = await _pointsService.GetRouteAsync(places, apiKey, mode);
+            if (CurrentRoute == null)
+                return Task.FromResult((new List<Location>(), 0d, 0d));
 
-            if (json == null)
-            {
-                return (new List<Location>(), 0, 0);
-            }
+            var points = CurrentRoute.RoutePath?
+                .Select(c => new Location(c.Latitude, c.Longitude))
+                .ToList() ?? new List<Location>();
 
-            try
-            {
-                var firstResult = json["results"]?[0];
-                if (firstResult?["distance"] != null && firstResult?["time"] != null)
-                {
-                    double distance = (double)firstResult["distance"];
-                    double time = (double)firstResult["time"];
+            double distance = CurrentRoute.RouteInfo?.RouteDistance ?? 0;
+            double time = CurrentRoute.RouteDuration;
 
-                    var geometry = firstResult["geometry"]?[0];
-                    if (geometry != null)
-                    {
-                        var routePoints = new List<Location>();
-                        foreach (var point in geometry)
-                        {
-                            if (point?["lon"] != null && point?["lat"] != null)
-                            {
-                                double lon = (double)point["lon"];
-                                double lat = (double)point["lat"];
-                                routePoints.Add(new Location(lat, lon));
-                            }
-                        }
-                        return (routePoints, distance, time);
-                    }
-                }
-
-                return (new List<Location>(), 0, 0);
-            }
-            catch (Exception)
-            {
-                return (new List<Location>(), 0, 0);
-            }
+            return Task.FromResult((points, distance, time));
         }
 
-        [RelayCommand]
-        public async Task UpdateFavorite()
+         [RelayCommand]
+        public async Task UpdateFavorite(RouteCardUserResponseDto route)
         {
-            if (CurrentRoute != null && CurrentRoute.RouteInfo != null)
+            if (route != null)
             {
-                CurrentRoute.RouteInfo.UserLike.IsUserFavorite = !CurrentRoute.RouteInfo.UserLike.IsUserFavorite;
+                await _routeService.Update(route.RouteInfo.RouteId);
                 OnPropertyChanged(nameof(CurrentRoute));
             }
         }
@@ -226,7 +226,7 @@ namespace MauiDemo2.ViewModels
         public partial class StarRating : ObservableObject
         {
             public int Index { get; set; }
-            private Brush _starColor;
+            private Brush _starColor = Brush.LightGray;
 
             public Brush StarColor
             {
@@ -240,10 +240,10 @@ namespace MauiDemo2.ViewModels
 
         private void ResetStarRatingBackgroundColor()
         {
-            StarList.Clear();
+            _starList.Clear();
             for (int i = 1; i <= 5; i++)
             {
-                StarList.Add(new StarRating { Index = i, StarColor = Brush.LightGray });
+                _starList.Add(new StarRating { Index = i, StarColor = Brush.LightGray });
             }
         }
 
@@ -253,7 +253,7 @@ namespace MauiDemo2.ViewModels
             ResetStarRatingBackgroundColor();
             for (int i = 0; i < starRating.Index; i++)
             {
-                StarList[i].StarColor = Brush.Gold;
+                _starList[i].StarColor = Brush.Gold;
             }
         }
     }

@@ -63,7 +63,6 @@ namespace MauiDemo2.ViewModel
             _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
             _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
             _markService = markService ?? throw new ArgumentNullException(nameof(markService));
-            // _routeService.RouteUpdated += OnRouteUpdated;
             WeakReferenceMessenger.Default.Register<RouteUpdatedMessage>(this, (r, msg) =>
             {
                 var (routeId, userLike) = msg.Value;
@@ -88,7 +87,6 @@ namespace MauiDemo2.ViewModel
             Routes = new ObservableCollection<RouteCardUserResponseDto>(routes);
 
             System.Diagnostics.Debug.WriteLine($"[ProfilePageViewModel] Routes count: {Routes.Count}");
-            // Логируем UserProfile.UserInfo
             if (UserProfile?.UserInfo != null)
             {
                 System.Diagnostics.Debug.WriteLine($"[ProfilePageViewModel] UserInfo: Id={UserProfile.UserInfo.UserId}, Username={UserProfile.UserInfo.Username}, FirstName={UserProfile.UserInfo.FirstName}, LastName={UserProfile.UserInfo.LastName}, Image={UserProfile.UserInfo.ImageUrl}");
@@ -98,7 +96,6 @@ namespace MauiDemo2.ViewModel
                 System.Diagnostics.Debug.WriteLine($"[ProfilePageViewModel] UserInfo is null");
             }
 
-            // Обновляем буферные списки
             FavoriteRoutes = new ObservableCollection<RouteCardUserResponseDto>(
                 Routes.Where(r => r.UserMarks != null && r.UserMarks.Any(m => m.MarkType == MarkType.Like))
             );
@@ -163,7 +160,6 @@ namespace MauiDemo2.ViewModel
 
         private async void OnRouteUpdated(int routeId, UserLike? userLike)
         {
-            // Просто полностью обновляем маршруты и связанные коллекции
             await LoadRoutesAsync();
             System.Diagnostics.Debug.WriteLine($"[ProfilePageViewModel] OnRouteUpdated: Reloaded all routes after update for RouteId={routeId}");
         }

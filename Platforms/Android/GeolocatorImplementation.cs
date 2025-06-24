@@ -52,7 +52,6 @@ namespace MauiDemo2.Platforms.Android
         public GeolocationContinuousListener()
         {
             locationManager = (LocationManager?)global::Android.App.Application.Context.GetSystemService(global::Android.Content.Context.LocationService);
-            // Requests location updates each second and notify if location changes more then 100 meters
             locationManager?.RequestLocationUpdates(LocationManager.GpsProvider, 1000, 100, this);
         }
 

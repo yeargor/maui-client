@@ -48,6 +48,7 @@
                                    Placeholder="Поиск маршрута..."
                                    Text="{Binding SearchText, Mode=TwoWay}"
                                    BackgroundColor="Transparent"
+                                   TextColor="Black"
                                    FontSize="14"
                                    VerticalOptions="Center"
                                    Margin="0,0,10,0"/>

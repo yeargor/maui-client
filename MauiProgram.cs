@@ -67,6 +67,11 @@ namespace MauiDemo2
             builder.Services.AddSingleton<IFixture, Fixture>();
             builder.Services.AddAutoMapper(typeof(MappingProfile));
             builder.Services.AddSingleton<AuthService>();
+            builder.Services.AddSingleton<ReviewsService>(provider =>
+            {
+                var httpClient = new HttpClient();
+                return new ReviewsService(httpClient);
+            });
 
 #if DEBUGk9
             builder.Logging.AddDebug();

@@ -39,7 +39,7 @@ namespace MauiDemo2.Services
 
             var json = System.Text.Json.JsonSerializer.Serialize(mark);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("http://10.0.2.2:5246/api/marks/create", content);
+            var response = await client.PostAsync("https://byways-p378.onrender.com/api/marks/create", content);
             return response.IsSuccessStatusCode;
         }
 
@@ -52,7 +52,7 @@ namespace MauiDemo2.Services
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.DeleteAsync($"http://10.0.2.2:5246/api/marks/delete/{markId}");
+            var response = await client.DeleteAsync($"https://byways-p378.onrender.com/api/marks/delete/{markId}");
             return response.IsSuccessStatusCode;
         }
     }

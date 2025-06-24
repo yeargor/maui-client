@@ -42,7 +42,6 @@ namespace MauiDemo2.Services
             _mapPageRoutes = await GenerateTestMapPageRoutesAsync();
         }
 
-        // Метод для CardPage (название сохранено)
         public async Task<List<RouteCardResponseDto>> GetRoutesAsync()
         {
             var token = string.Empty;
@@ -65,7 +64,7 @@ namespace MauiDemo2.Services
                 System.Diagnostics.Debug.WriteLine("JWT токен не найден в Preferences");
             }
 
-            var response = await client.GetAsync("http://10.0.2.2:5246/api/routes");
+            var response = await client.GetAsync("https://byways-p378.onrender.com/api/routes");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
 
@@ -81,8 +80,6 @@ namespace MauiDemo2.Services
             }
             return routes ?? new List<RouteCardResponseDto>();
         }
-
-        // Метод для обновления маршрута (название сохранено)
         public async Task Update(int routeId)
         {
             var currentUser = currentUserService.GetCurrentUser();
@@ -92,22 +89,18 @@ namespace MauiDemo2.Services
 
             if (userLikeMark == null)
             {
-                // Создаём лайк
                 await markService.CreateMarkAsync(new Mark {
                     UserId = currentUser.UserInfo.UserId,
                     RouteId = routeId,
                     MarkType = MarkType.Like
                 });
-                newUserLike = new UserLike { MarkId = 0, IsUserFavorite = true }; // MarkId можно обновить после получения с сервера
+                newUserLike = new UserLike { MarkId = 0, IsUserFavorite = true };
             }
             else
             {
-                // Удаляем лайк
                 await markService.DeleteMarkAsync(userLikeMark.MarkId);
                 newUserLike = null;
             }
-
-            // RouteUpdated?.Invoke(routeId, newUserLike);
             WeakReferenceMessenger.Default.Send(new RouteUpdatedMessage(routeId, newUserLike));
         }
 
@@ -127,8 +120,6 @@ namespace MauiDemo2.Services
         //         .Where(r => filteredRouteIds.Contains(r.Id))
         //         .ToList();
         // }
-
-        // Новый метод для MapPage
         public async Task<RouteFollowingMap> GetRouteForMapPageAsync(int routeId)
         {
             var route = _mapPageRoutes.FirstOrDefault(r => r.Id == routeId);
@@ -594,7 +585,6 @@ namespace MauiDemo2.Services
             return null;
         }
 
-        // Получение маршрутов для ProfilePage по id пользователя
         public async Task<List<RouteCardUserResponseDto>> GetRoutesForProfilePage()
         {
             var token = JwtService.GetJwtToken();
@@ -610,7 +600,7 @@ namespace MauiDemo2.Services
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync($"http://10.0.2.2:5246/api/routes/user/{userId}");
+            var response = await client.GetAsync($"https://byways-p378.onrender.com/api/routes/user/{userId}");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
 
@@ -761,7 +751,7 @@ namespace MauiDemo2.Services
             };
         }
 
-        public async Task<RouteCardResponseDto?> GetRouteById(int routeId)
+        public async Task<RoutePostResponseDto?> GetRouteById(int routeId)
         {
             var token = JwtService.GetJwtToken();
             if (string.IsNullOrEmpty(token))
@@ -773,11 +763,11 @@ namespace MauiDemo2.Services
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync($"http://10.0.2.2:5246/api/routes/{routeId}");
+            var response = await client.GetAsync($"https://byways-p378.onrender.com/api/routes/{routeId}");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             System.Diagnostics.Debug.WriteLine($"[RouteService] JSON response for GetRouteById: {json}");
-            return JsonSerializer.Deserialize<RouteCardResponseDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return JsonSerializer.Deserialize<RoutePostResponseDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
     }
 }

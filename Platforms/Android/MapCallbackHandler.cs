@@ -18,13 +18,11 @@ class MapCallbackHandler(CustomMapHandler mapHandler) : Java.Lang.Object, IOnMap
         googleMap.UiSettings.ZoomControlsEnabled = true;
         googleMap.UiSettings.MyLocationButtonEnabled = true;
 
-        // Adjust padding for zoom controls (centered on the right side)
         int screenHeight = Resources.System.DisplayMetrics.HeightPixels;
-        int zoomControlHeight = 200; // Approximate height of zoom controls in pixels
+        int zoomControlHeight = 200;
         int verticalPadding = (screenHeight - zoomControlHeight) / 2;
         googleMap.SetPadding(0, 0, 20, verticalPadding);
 
-        // Disable the map toolbar
         googleMap.UiSettings.MapToolbarEnabled = false;
 
         var a = Assembly.GetExecutingAssembly();

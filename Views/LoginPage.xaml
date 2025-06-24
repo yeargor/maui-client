@@ -44,6 +44,7 @@
                                        FontSize="14"
                                        VerticalOptions="Center"
                                        Margin="10,0,10,0"
+                                       TextColor="Black"
                                        BackgroundColor="Transparent"/>
                             </Grid>
                         <Border.Shadow>
@@ -78,6 +79,7 @@
                                        FontSize="14"
                                        VerticalOptions="Center"
                                        Margin="10,0,10,0"
+                                       TextColor="Black"
                                        BackgroundColor="Transparent"/>
                                 <Image Grid.Column="1"
                                         Margin="0,0,10,0"

@@ -62,7 +62,7 @@ namespace MauiDemo2.Services
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             System.Diagnostics.Debug.WriteLine($"[USER_SERVICE] Searching for user with id {userId}");
-            var response = await client.GetAsync($"http://10.0.2.2:5246/api/users/{userId}/profile");
+            var response = await client.GetAsync($"https://byways-p378.onrender.com/api/users/{userId}/profile");
             System.Diagnostics.Debug.WriteLine($"[USER_SERVICE] Response for user {response}");
             if (!response.IsSuccessStatusCode)
                 return null;

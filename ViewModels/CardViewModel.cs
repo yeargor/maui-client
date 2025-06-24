@@ -88,7 +88,6 @@ namespace MauiDemo2.ViewModels
             OpenRouteDetailsCommand = new RelayCommand<RouteCardResponseDto>(OpenRouteDetails);
             ToggleFlyoutCommand = new RelayCommand(ToggleFlyout);
             StartRouteCommand = new Command(StartRoute);
-            // _routeService.RouteUpdated += OnRouteUpdated;
             WeakReferenceMessenger.Default.Register<RouteUpdatedMessage>(this, (r, msg) =>
             {
                 var (routeId, userLike) = msg.Value;

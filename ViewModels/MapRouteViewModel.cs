@@ -158,7 +158,7 @@ namespace MauiDemo2.ViewModels
             double distance = (double)firstResult["distance"];
             double time = (double)firstResult["time"];
 
-            var geometry = firstResult["geometry"]; // Получаем массив всех сегментов
+            var geometry = firstResult["geometry"];
             if (geometry == null)
             {
                 return (new List<Location>(), distance, time);
@@ -166,10 +166,8 @@ namespace MauiDemo2.ViewModels
 
             var routePoints = new List<Location>();
             
-            // Перебираем все сегменты маршрута
             foreach (var segment in geometry)
             {
-                // Перебираем все точки в текущем сегменте
                 foreach (var point in segment)
                 {
                     try
@@ -180,7 +178,6 @@ namespace MauiDemo2.ViewModels
                     }
                     catch (Exception)
                     {
-                        // Пропускаем некорректные точки
                         continue;
                     }
                 }

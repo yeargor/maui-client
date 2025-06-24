@@ -14,3 +14,10 @@ public class Review
     
     public float Grade { get; set; }
 }
+public class CreateReviewRequestDto
+{
+    public int UserId { get; set; }
+    public int RouteId { get; set; }
+    public string Text { get; set; }
+    public float Grade { get; set; }
+}
